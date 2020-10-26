@@ -1,5 +1,6 @@
 
 from wtforms import SubmitField, BooleanField, StringField, PasswordField, validators
+from wtforms.fields.html5 import EmailField
 from flask_wtf import Form
 
 class RegForm(Form):
@@ -18,6 +19,8 @@ class RegForm(Form):
   submit = SubmitField('Submit')
 
 class LoginForm(Form):
-    first_name = StringField(u'First Name', validators=[validators.input_required()])
-    last_name  = StringField(u'Last Name', validators=[validators.optional()])
+  email = StringField('Email', [validators.InputRequired(),validators.Length(1, 64),validators.Email()])
+  password = PasswordField('Password', [validators.InputRequired()])
+  remember_me = BooleanField('Keep me logged in')
+  submit = SubmitField('Log in')
 
