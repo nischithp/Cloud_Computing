@@ -22,9 +22,13 @@ def login():
     if form.validate_on_submit():
         email = form.email.data
         password = hashlib.sha384(form.password.data.encode()).hexdigest()
-        data = {
+        
+        params = {
+        request: "login",
+        data: {
             "email": email,
             "password":password
+        }
         }
         # params = [{username: user, password: password}]
         # r = request.post("URL", params="")
@@ -41,13 +45,18 @@ def registration():
         email = form.email.data
         password = hashlib.sha384(form.password.data.encode()).hexdigest()
         today = datetime.datetime.now().isoformat()
-        data = {
-            "first_name": first_name,
+        
+        params = {
+        request: "register",
+        data: {
+           "first_name": first_name,
             "last_name": last_name,
             "email": email,
             "password":password,
             "time": today
         }
+        }
+
         print (data)
         
         return ('REGISTERED')
