@@ -1,8 +1,11 @@
+from datetime import time
 import os
 
 from flask import Flask, request, render_template
 from models import RegForm, LoginForm
 from flask_bootstrap import Bootstrap
+import hashlib
+import datetime
 
 app = Flask(__name__)
 app.config.from_mapping(
@@ -11,23 +14,42 @@ Bootstrap(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    form = LoginForm()
-    if request.method == 'POST' and form.validate_on_submit():
-        return render_template('pong.html')
-    return render_template("index.html", form=form)
+    return render_template("index.html")
 
 @app.route('/login.html', methods=['GET', 'POST'])
 def login():
     form = LoginForm(request.form)
     if form.validate_on_submit():
-        user = form.email
+        email = form.email.data
+        password = hashlib.sha384(form.password.data.encode()).hexdigest()
+        data = {
+            "email": email,
+            "password":password
+        }
+        # params = [{username: user, password: password}]
+        # r = request.post("URL", params="")
+        # data = r.json()
         return ("LOGGED IN")
     return render_template("login.html", form=form)
 
 @app.route('/register.html', methods=['GET', 'POST'])
 def registration():
     form = RegForm(request.form)
-    if request.method == 'POST' and form.validate_on_submit():
+    if form.validate_on_submit():
+        first_name = form.name_first.data
+        last_name = form.name_last.data
+        email = form.email.data
+        password = hashlib.sha384(form.password.data.encode()).hexdigest()
+        today = datetime.datetime.now().isoformat()
+        data = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "password":password,
+            "time": today
+        }
+        print (data)
+        
         return ('REGISTERED')
     return render_template("register.html", form=form)
 
