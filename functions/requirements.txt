@@ -1,3 +1,4 @@
 SQLAlchemy
 PyMySQL
 flask_sqlalchemy
+pymysql
