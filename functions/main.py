@@ -1,12 +1,11 @@
 import sqlalchemy
-from flask import escape, jsonify, request, make_response
+from flask import jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 
 
 def user_access(request):
-    connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
-
     mysql = {"database": "video_sharing",
              "host": "35.232.179.75",
              "port": "127.0.0.1:3306",
@@ -16,7 +15,6 @@ def user_access(request):
              "driver": "mysql+pymysql",
              "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
              }
-    query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
 
     engine = create_engine(mysql["url"])
     db = scoped_session(sessionmaker(bind=engine))
@@ -28,12 +26,9 @@ def user_access(request):
              "bad method": {"code": 405, "message": "Method not allowed, please use post method"},
              "unacceptable": {"code": 406, "message": "Request is not acceptable, "
                                                       "accepted requests are login, register and update"},
+             "empty field": {"code": 406, "message": "Request is not acceptable, user information can not be empty"},
              "unprocessable": {"code": 422, "message": "JSON format is not correct"},
              "internal": {"code": 500, "message": "Unexpected error in our database/server"}}
-
-    # print("request.method: ", request.method)
-    # print("request.method: ", request.method)
-    # print("request.headers: ", request.headers)
 
     if request.method != "POST":
         return error["bad method"]["message"], error["bad method"]["code"]
@@ -42,67 +37,104 @@ def user_access(request):
 
     if not request_json:
         return error["bad request"]["message"], error["bad request"]["code"]
-    if "request" not in request_json or "data" not in request_json:
+
+    necessary_info = ["request", "data"]
+    if not all(info in request_json for info in necessary_info):
         return error["unprocessable"]["message"], error["unprocessable"]["code"]
 
     check_user_query = sqlalchemy.text("SELECT 1 FROM users WHERE email = :email")
-    if request_json["request"].lower() == "login":
+    get_user_query = sqlalchemy.text("SELECT id, username, firstname, lastname, email, date_time"
+                                     " FROM users WHERE email = :email AND password = :password")
 
-        if "email" not in request_json["data"] or "password" not in request_json["data"]:
+    if request_json["request"].lower() == "login":
+        print("login")
+
+        necessary_info = ["email", "password"]
+        if not all(info in request_json["data"] for info in necessary_info):
             return error["unprocessable"]["message"], error["unprocessable"]["code"]
 
-        if db.execute(check_user_query, {"email": request_json["data"]["email"]}).fetchall():
-            get_user_query = sqlalchemy.text("SELECT id, username, firstname, lastname, date_time"
-                                             " FROM users WHERE email = :email AND password = :password")
-            user = db.execute(get_user_query, request_json["data"]).fetchone()
+        if not all(request_json["data"][info] for info in necessary_info):
+            return error["empty field"]["message"], error["empty field"]["code"]
 
-            if user:
-                user = {"id": user[0], "username": user[1], "firstname": user[2],
-                        "lastname": user[3], "date_time": user[4]}
-                return jsonify(user)
+        try:
+            if db.execute(check_user_query, {"email": request_json["data"]["email"]}).fetchall():
+                user = db.execute(get_user_query, request_json["data"]).fetchone()
+                if user:
+                    user = {"id": user[0], "username": user[1], "firstname": user[2],
+                            "lastname": user[3], "email": user[4], "date_time": user[5]}
+                    return jsonify(user)
+                else:
+                    return error["unauthorised"]["message"], error["unauthorised"]["code"]
             else:
-                return error["unauthorised"]["message"], error["unauthorised"]["code"]
-        else:
-            return error["not found"]["message"], error["not found"]["code"]
+                return error["not found"]["message"], error["not found"]["code"]
+
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return error, 500
 
     elif request_json["request"].lower() == "register":
 
+        print("register")
         necessary_info = ["username", "firstname", "email", "password"]
-        if all(info in request_json["data"] for info in necessary_info):
+        if not all(info in request_json["data"] for info in necessary_info):
+            return error["unprocessable"]["message"], error["unprocessable"]["code"]
 
-            if db.execute(check_user_query, {"email": request_json["data"]["email"]}).fetchall():
-                return error["forbidden"]["message"], error["forbidden"]["code"]
+        if not all(request_json["data"][info] for info in necessary_info):
+            return error["empty field"]["message"], error["empty field"]["code"]
 
-            if "lastname" in request_json["data"] and request_json["data"]["lastname"]:
-                insert_with_lastname_query = sqlalchemy.text("INSERT INTO users (username, email, "
-                                                             "firstname, lastname, password) "
-                                                             "VALUES (:username, :email, :firstname, "
-                                                             ":lastname, :password)")
-                try:
-                    db.execute(insert_with_lastname_query,
-                               request_json["data"])
-                    return "inserted with lastname"
-                except:
-                    return "except with"
+        try:
+            user_in_db = db.execute(check_user_query, {"email": request_json["data"]["email"]}).fetchall()
 
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return error, 500
 
-            else:
-                insert_without_lastname_query = sqlalchemy.text("INSERT INTO users (username, email, "
-                                                                "firstname, password) "
-                                                                "VALUES (:username, :email, :firstname, :password)")
+        if user_in_db:
+            return error["forbidden"]["message"], error["forbidden"]["code"]
 
-                try:
-                    db.execute(insert_without_lastname_query,
+        if "lastname" in request_json["data"] and request_json["data"]["lastname"]:
+            insert_with_lastname_query = sqlalchemy.text("INSERT INTO users (username, email, "
+                                                         "firstname, lastname, password) "
+                                                         "VALUES (:username, :email, :firstname, "
+                                                         ":lastname, :password)")
+            try:
+                db.execute(insert_with_lastname_query,
                            request_json["data"])
-                except:
-                    return "except without"
-
-                return "inserted without lastname"
-
-            db.commit()
+                db.commit()
+                # return "inserted with lastname"
+            except SQLAlchemyError as e:
+                error = str(e.__dict__['orig'])
+                return error, 500
 
         else:
-            return error["unprocessable"]["message"], error["unprocessable"]["code"]
+            insert_without_lastname_query = sqlalchemy.text("INSERT INTO users (username, email, firstname, password)"
+                                                            "VALUES (:username, :email, :firstname, :password)")
+            try:
+                db.execute(insert_without_lastname_query,
+                           request_json["data"])
+                db.commit()
+
+            except SQLAlchemyError as e:
+                error = str(e.__dict__['orig'])
+                return error, 500
+
+        try:
+            user = db.execute(get_user_query, request_json["data"]).fetchone()
+
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return error, 500
+
+        if user:
+            user = {"id": user[0], "username": user[1], "firstname": user[2],
+                    "lastname": user[3], "email": user[4], "date_time": user[5]}
+            return jsonify(user), 201
+        else:
+            return error["unauthorised"]["message"], error["unauthorised"]["code"]
+
+    else:
+        return "you can only register or login"
+        print("not register")
 
     #
     # tables = db.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")
@@ -111,6 +143,7 @@ def user_access(request):
     user = {"username": "Naveen",
             "email": "naveensn100@gmail.com",
             "firstname": "Naveen",
+            "lastname": "Navn",
             "password": "asodasnasidndai"
             }
     #
@@ -124,6 +157,7 @@ def user_access(request):
                user)
     db.commit()
 
+    stmt = sqlalchemy.text("SELECT * from users")
     users = db.execute(stmt).fetchall()
     if users is not None:
         return jsonify([{key: value for key, value in row.items()} for row in users if row is not None]), 200
