@@ -1,23 +1,41 @@
 import sqlalchemy
 from flask import jsonify
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 
 
 def user_access(request):
-    mysql = {"database": "video_sharing",
-             "host": "35.232.179.75",
-             "port": "127.0.0.1:3306",
-             "connection": "cloudcomputinglab-291822:us-central1:cloud-computing",
-             "user_name": "cloud-computing",
-             "password": "cloud-computing",
-             "driver": "mysql+pymysql",
-             "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
-             }
+    # mysql = {"database": "video_sharing",
+    #          "host": "35.232.179.75",
+    #          "port": "127.0.0.1:3306",
+    #          "connection": "cloudcomputinglab-291822:us-central1:cloud-computing",
+    #          "username": "cloud-computing",
+    #          "password": "cloud-computing",
+    #          "drivername": "mysql+pymysql",
+    #          "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
+    #          }
 
-    engine = create_engine(mysql["url"])
-    db = scoped_session(sessionmaker(bind=engine))
+    # engine = create_engine(mysql["url"])
+
+    connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
+    query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
+
+    eng = create_engine(
+        engine.url.URL(
+            drivername="mysql+pymysql",
+            username="cloud-computing",
+            password="cloud-computing",
+            database="video_sharing",
+            query=query_string,
+        ),
+        pool_size=5,
+        max_overflow=2,
+        pool_timeout=30,
+        pool_recycle=1800
+    )
+
+    db = scoped_session(sessionmaker(bind=eng))
 
     error = {"bad request": {"code": 400, "message": "No JSON, request should include JSON object"},
              "unauthorised": {"code": 401, "message": "Incorrect password, please enter correct password"},
