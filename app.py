@@ -6,6 +6,7 @@ from models import RegForm, LoginForm
 from flask_bootstrap import Bootstrap
 import hashlib
 import datetime
+import requests, json
 
 app = Flask(__name__)
 app.config.from_mapping(
@@ -23,16 +24,13 @@ def login():
         email = form.email.data
         password = hashlib.sha384(form.password.data.encode()).hexdigest()
         
-        params = {
-        request: "login",
-        data: {
-            "email": email,
-            "password":password
-        }
-        }
-        # params = [{username: user, password: password}]
-        # r = request.post("URL", params="")
-        # data = r.json()
+        params = {"data": {"email": "aaa@gmial.com",    
+                       "password": "*71237**123712383"
+                       },
+              "request": "login"}
+        res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=params)
+        # data = res.json()
+        print(res.text)
         return ("LOGGED IN")
     return render_template("login.html", form=form)
 
@@ -43,22 +41,18 @@ def registration():
         first_name = form.name_first.data
         last_name = form.name_last.data
         email = form.email.data
+        username = form.user_name.data
         password = hashlib.sha384(form.password.data.encode()).hexdigest()
-        today = datetime.datetime.now().isoformat()
-        
-        params = {
-        request: "register",
-        data: {
-           "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "password":password,
-            "time": today
-        }
-        }
-
-        print (data)
-        
+        params = {"data": {"email": email,
+                       "password": password,
+                       "username": username,
+                       "firstname": first_name,
+                       "lastname": last_name},
+              "request": "login"}
+        # print(params)
+        res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=params)
+        # data = json.load(res)
+        print(res.text)        
         return ('REGISTERED')
     return render_template("register.html", form=form)
 
