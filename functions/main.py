@@ -3,6 +3,7 @@ from flask import jsonify
 from sqlalchemy import create_engine, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+import json
 
 
 def user_access(request):
@@ -15,8 +16,8 @@ def user_access(request):
     #          "drivername": "mysql+pymysql",
     #          "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
     #          }
-
-    # engine = create_engine(mysql["url"])
+    #
+    # eng = create_engine(mysql["url"])
 
     connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
     query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
@@ -52,7 +53,10 @@ def user_access(request):
         return error["bad method"]["message"], error["bad method"]["code"]
 
     request_json = request.get_json(silent=True)
-
+    if isinstance(request_json, str):
+        request_json = json.loads(request_json)
+    elif type(json.loads(request_json)) != dict:
+        return error["bad request"]["message"], error["bad request"]["code"]
     if not request_json:
         return error["bad request"]["message"], error["bad request"]["code"]
 
