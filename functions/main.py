@@ -38,16 +38,22 @@ def user_access(request):
 
     db = scoped_session(sessionmaker(bind=eng))
 
-    error = {"bad request": {"status": "fail", "code": 400, "error": "No JSON, request should include JSON object"},
-             "unauthorised": {"status": "fail", "code": 401, "error": "Incorrect password, please enter correct password"},
-             "forbidden": {"status": "fail", "code": 403, "error": "Duplicate email, email id already exists"},
-             "not found": {"status": "fail", "code": 404, "error": "User Not found, User does not exists in data base"},
-             "bad method": {"status": "fail", "code": 405, "error": "Method not allowed, please use post method"},
-             "unacceptable": {"status": "fail", "code": 406, "error": "Request is not acceptable, "
-                                                      "accepted requests are login, register and update"},
-             "empty field": {"status": "fail", "code": 406, "error": "Request is not acceptable, user information can not be empty"},
-             "unprocessable": {"status": "fail", "code": 422, "error": "JSON format is not correct"},
-             "internal": {"status": "fail", "code": 500, "error": "Unexpected error in our database/server"}}
+    error = {"bad request": {"status": "fail", "status_code": 400,
+                             "error": "No JSON, request should include JSON object"},
+             "unauthorised": {"status": "fail", "status_code": 401,
+                              "error": "Incorrect password, please enter correct password"},
+             "forbidden": {"status": "fail", "status_code": 403,
+                           "error": "Duplicate email, email id already exists"},
+             "not found": {"status": "fail", "status_code": 404,
+                           "error": "User Not found, User does not exists in data base"},
+             "bad method": {"status": "fail", "status_code": 405,
+                            "error": "Method not allowed, please use post method"},
+             "unacceptable": {"status": "fail", "status_code": 406,
+                              "error": "Request is not acceptable, accepted requests are login, register and update"},
+             "empty field": {"status": "fail", "status_code": 406,
+                             "error": "Request is not acceptable, user information can not be empty"},
+             "unprocessable": {"status": "fail", "status_code": 422, "error": "JSON format is not correct"},
+             "internal": {"status": "fail", "status_code": 500, "error": "Unexpected error in our database/server"}}
 
     if request.method != "POST":
         return jsonify(error["bad method"]), error["bad method"]["code"]
@@ -83,7 +89,7 @@ def user_access(request):
                 if user:
                     user = {"id": user[0], "username": user[1], "firstname": user[2],
                             "lastname": user[3], "email": user[4], "date_time": user[5]}
-                    return jsonify({"status": "pass", "user": user})
+                    return jsonify({"status": "success", "status_code": 200, "data": user})
                 else:
                     return jsonify(error["unauthorised"]), error["unauthorised"]["code"]
             else:
@@ -91,7 +97,7 @@ def user_access(request):
 
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
-            return jsonify({"status": "fail", "error": error}), 500
+            return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
     elif request_json["request"].lower() == "register":
 
@@ -107,7 +113,7 @@ def user_access(request):
 
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
-            return jsonify({"status": "fail", "error": error}), 500
+            return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
         if user_in_db:
             return jsonify(error["forbidden"]), error["forbidden"]["code"]
@@ -124,7 +130,7 @@ def user_access(request):
 
             except SQLAlchemyError as e:
                 error = str(e.__dict__['orig'])
-                return jsonify({"status": "fail", "error": error}), 500
+                return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
         else:
             insert_without_lastname_query = sqlalchemy.text("INSERT INTO users (username, email, firstname, password)"
@@ -136,19 +142,19 @@ def user_access(request):
 
             except SQLAlchemyError as e:
                 error = str(e.__dict__['orig'])
-                return jsonify({"status": "fail", "error": error}), 500
+                return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
         try:
             user = db.execute(get_user_query, request_json["data"]).fetchone()
 
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
-            return jsonify({"status": "fail", "error": error}), 500
+            return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
         if user:
             user = {"id": user[0], "username": user[1], "firstname": user[2],
                     "lastname": user[3], "email": user[4], "date_time": user[5]}
-            return jsonify({"status": "pass", "user": user}), 201
+            return jsonify({"status": "success", "status_code": 201, "data": user}), 201
         else:
             return jsonify(error["unauthorised"]), error["unauthorised"]["code"]
 
