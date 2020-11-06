@@ -56,19 +56,19 @@ def user_access(request):
              "internal": {"status": "fail", "status_code": 500, "error": "Unexpected error in our database/server"}}
 
     if request.method != "POST":
-        return jsonify(error["bad method"]), error["bad method"]["code"]
+        return jsonify(error["bad method"]), error["bad method"]["status_code"]
 
     request_json = request.get_json(silent=True)
     if isinstance(request_json, str):
         request_json = json.loads(request_json)
     elif type(request_json) != dict:
-        return jsonify(error["bad request"]), error["bad request"]["code"]
+        return jsonify(error["bad request"]), error["bad request"]["status_code"]
     if not request_json:
-        return jsonify(error["bad request"]), error["bad request"]["code"]
+        return jsonify(error["bad request"]), error["bad request"]["status_code"]
 
     necessary_info = ["request", "data"]
     if not all(info in request_json for info in necessary_info):
-        return jsonify(error["unprocessable"]), error["unprocessable"]["code"]
+        return jsonify(error["unprocessable"]), error["unprocessable"]["status_code"]
 
     check_user_query = sqlalchemy.text("SELECT 1 FROM users WHERE email = :email")
     get_user_query = sqlalchemy.text("SELECT id, username, firstname, lastname, email, date_time"
@@ -78,10 +78,10 @@ def user_access(request):
 
         necessary_info = ["email", "password"]
         if not all(info in request_json["data"] for info in necessary_info):
-            return jsonify(error["unprocessable"]), error["unprocessable"]["code"]
+            return jsonify(error["unprocessable"]), error["unprocessable"]["status_code"]
 
         if not all(request_json["data"][info] for info in necessary_info):
-            return jsonify(error["empty field"]), error["empty field"]["code"]
+            return jsonify(error["empty field"]), error["empty field"]["status_code"]
 
         try:
             if db.execute(check_user_query, {"email": request_json["data"]["email"]}).fetchall():
@@ -91,9 +91,9 @@ def user_access(request):
                             "lastname": user[3], "email": user[4], "date_time": user[5]}
                     return jsonify({"status": "success", "status_code": 200, "data": user})
                 else:
-                    return jsonify(error["unauthorised"]), error["unauthorised"]["code"]
+                    return jsonify(error["unauthorised"]), error["unauthorised"]["status_code"]
             else:
-                return jsonify(error["not found"]), error["not found"]["code"]
+                return jsonify(error["not found"]), error["not found"]["status_code"]
 
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
@@ -103,10 +103,10 @@ def user_access(request):
 
         necessary_info = ["username", "firstname", "email", "password"]
         if not all(info in request_json["data"] for info in necessary_info):
-            return jsonify(error["unprocessable"]), error["unprocessable"]["code"]
+            return jsonify(error["unprocessable"]), error["unprocessable"]["status_code"]
 
         if not all(request_json["data"][info] for info in necessary_info):
-            return jsonify(error["empty field"]), error["empty field"]["code"]
+            return jsonify(error["empty field"]), error["empty field"]["status_code"]
 
         try:
             user_in_db = db.execute(check_user_query, {"email": request_json["data"]["email"]}).fetchall()
@@ -116,7 +116,7 @@ def user_access(request):
             return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
         if user_in_db:
-            return jsonify(error["forbidden"]), error["forbidden"]["code"]
+            return jsonify(error["forbidden"]), error["forbidden"]["status_code"]
 
         if "lastname" in request_json["data"] and request_json["data"]["lastname"]:
             insert_with_lastname_query = sqlalchemy.text("INSERT INTO users (username, email, "
@@ -156,7 +156,7 @@ def user_access(request):
                     "lastname": user[3], "email": user[4], "date_time": user[5]}
             return jsonify({"status": "success", "status_code": 201, "data": user}), 201
         else:
-            return jsonify(error["unauthorised"]), error["unauthorised"]["code"]
+            return jsonify(error["unauthorised"]), error["unauthorised"]["status_code"]
 
     else:
         return "you can only register or login"
