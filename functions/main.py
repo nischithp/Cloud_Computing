@@ -82,6 +82,7 @@ def user_access(request):
                             "lastname": user[3], "email": user[4], "date_time": user[5]}
                     return jsonify(user)
                 else:
+                    # return all responses as JSON. Don't send any text or dictionary responses.
                     return error["unauthorised"]["message"], error["unauthorised"]["code"]
             else:
                 return error["not found"]["message"], error["not found"]["code"]
@@ -149,11 +150,11 @@ def user_access(request):
             return jsonify(user), 201
         else:
             return error["unauthorised"]["message"], error["unauthorised"]["code"]
-
+   
+    elif request_json["request"].lower() == "update":
+        return "We are here"
     else:
-        return "you can only register or login"
-        print("not register")
-
+        return ("You can only login/register/update")
     #
     # tables = db.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")
     # return jsonify([{key: value for key, value in row.items()} for row in tables if row is not None]), 200
