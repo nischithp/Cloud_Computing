@@ -158,9 +158,10 @@ def user_access(request):
         else:
             return jsonify(error["unauthorised"]), error["unauthorised"]["status_code"]
 
+    elif request_json["request"].lower() == "register":
+        return "WE HERE"
     else:
         return "you can only register or login"
-        print("not register")
 
     #
     # tables = db.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")
