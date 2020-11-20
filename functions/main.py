@@ -7,34 +7,40 @@ import json
 
 
 def user_access(request):
-    # mysql = {"database": "video_sharing",
-    #          "host": "35.232.179.75",
-    #          "port": "127.0.0.1:3306",
-    #          "connection": "cloudcomputinglab-291822:us-central1:cloud-computing",
-    #          "username": "cloud-computing",
-    #          "password": "cloud-computing",
-    #          "drivername": "mysql+pymysql",
-    #          "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
-    #          }
-    #
-    # eng = create_engine(mysql["url"])
+    # --------------Local testing connection string starts here---------------
+    mysql = {"database": "video_sharing",
+             "host": "35.232.179.75",
+             "port": "127.0.0.1:3306",
+             "connection": "cloudcomputinglab-291822:us-central1:cloud-computing",
+             "username": "cloud-computing",
+             "password": "cloud-computing",
+             "drivername": "mysql+pymysql",
+             "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
+             }
+    
+    eng = create_engine(mysql["url"])
 
-    connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
-    query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
+    # --------------Local testing connection string ends here------------------
 
-    eng = create_engine(
-        engine.url.URL(
-            drivername="mysql+pymysql",
-            username="cloud-computing",
-            password="cloud-computing",
-            database="video_sharing",
-            query=query_string,
-        ),
-        pool_size=5,
-        max_overflow=2,
-        pool_timeout=30,
-        pool_recycle=1800
-    )
+    # ---------------------Cloud connection String starts here-----------
+
+    # connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
+    # query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
+
+    # eng = create_engine(
+    #     engine.url.URL(
+    #         drivername="mysql+pymysql",
+    #         username="cloud-computing",
+    #         password="cloud-computing",
+    #         database="video_sharing",
+    #         query=query_string,
+    #     ),
+    #     pool_size=5,
+    #     max_overflow=2,
+    #     pool_timeout=30,
+    #     pool_recycle=1800
+    # )
+    #------------------ Cloud connection string ends here------------------------
 
     db = scoped_session(sessionmaker(bind=eng))
 
@@ -73,6 +79,7 @@ def user_access(request):
     check_user_query = sqlalchemy.text("SELECT 1 FROM users WHERE email = :email")
     get_user_query = sqlalchemy.text("SELECT id, username, firstname, lastname, email, date_time"
                                      " FROM users WHERE email = :email AND password = :password")
+    update_user_query = sqlalchemy.text("SELECT * FROM users")
 
     if request_json["request"].lower() == "login":
 
@@ -158,8 +165,40 @@ def user_access(request):
         else:
             return jsonify(error["unauthorised"]), error["unauthorised"]["status_code"]
     
+    # To handle the update operations for the API
     elif request_json["request"].lower() == "update":
-        return "WE HERE"
+        userID = request_json["data"]["id"]
+        oldPassword = request_json["data"]["oldPassword"]
+        newPassword = request_json["data"]["newPassword"]
+        password_compare_query = sqlalchemy.text("select id from users where id="+userID+" and password='"+oldPassword+"'")
+        passwordUpdateQuery = sqlalchemy.text("UPDATE users SET password='"+newPassword+"' WHERE id="+userID)
+
+        # Check to see if the old and new passwords are same. If not, do not even proceed further.
+        try:
+            comparisonResult = db.execute(password_compare_query).fetchone()
+            print (comparisonResult)
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
+
+        # Check if comaparisonResult is set from the earlier query. If it is, then execute the update query and commit the transaction, else send a 401 response.
+        if comparisonResult:
+            try:
+                updateResult = db.execute(passwordUpdateQuery)
+                db.commit()
+            except SQLAlchemyError as e:
+                error = str(e.__dict__['orig'])
+                return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
+            
+            print(updateResult)
+            # Check to see if the cursor's updated rows is 1, to denote succesful update, else send error
+            if updateResult:
+                return jsonify({"status": "success", "status_code": 200, "data":"password updated"}), 200
+            else:
+                return jsonify({"status": "fail", "status_code": 422, "error":"Missing or Invalid Data"}), 422
+
+        else:
+            return jsonify({"status": "unauthorized", "status_code": 401, "error": "old and new passwords do not match"}), 401
     else:
         return "you can only register or login"
 
