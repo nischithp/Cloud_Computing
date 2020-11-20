@@ -7,6 +7,7 @@ class RegForm(Form):
   name_first = StringField('First Name', 
                  [validators.DataRequired()])
   name_last = StringField('Last Name')
+  user_name = StringField('User Name')
   email = StringField('Email Address', [validators.DataRequired(), 
              validators.Email(), validators.Length(min=6, max=35)])
   password = PasswordField('New Password', [validators.DataRequired(),validators.EqualTo('confirm', message='Passwords must match')])
@@ -18,4 +19,12 @@ class LoginForm(Form):
   password = PasswordField('Password', [validators.InputRequired()])
   remember_me = BooleanField('Keep me logged in')
   submit = SubmitField('Log in')
+
+class EditProfileForm(Form):
+  oldPassword = PasswordField('Old Password', [validators.InputRequired()])
+  newPassword = PasswordField('New Password', [validators.InputRequired()])
+  confirm = PasswordField('Repeat Password',  [validators.DataRequired(),validators.EqualTo('newPassword', message='Passwords must match')])
+  submit = SubmitField('Change Password')
+
+
 
