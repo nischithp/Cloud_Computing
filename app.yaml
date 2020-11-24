@@ -1,0 +1,4 @@
+runtime: custom # or python38
+
+env: flex
+entrypoint: gunicorn --bind:$PORT main:app

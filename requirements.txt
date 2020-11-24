@@ -18,5 +18,5 @@ webassets
 Werkzeug
 WTForms
 Flask-Session
-
+requests
 flask_bootstrap

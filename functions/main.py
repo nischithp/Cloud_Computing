@@ -192,7 +192,7 @@ def user_access(request):
             
             print(updateResult)
             # Check to see if the cursor's updated rows is 1, to denote succesful update, else send error
-            if updateResult:
+            if updateResult :
                 return jsonify({"status": "success", "status_code": 200, "data":"password updated"}), 200
             else:
                 return jsonify({"status": "fail", "status_code": 422, "error":"Missing or Invalid Data"}), 422
@@ -200,7 +200,8 @@ def user_access(request):
         else:
             return jsonify({"status": "unauthorized", "status_code": 401, "error": "old and new passwords do not match"}), 401
     else:
-        return "you can only register or login"
+        return jsonify({"status": "Error", "status_code": 404, "error": "You can only login, register or editProfile"}), 404
+
 
     #
     # tables = db.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")

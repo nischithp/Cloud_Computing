@@ -11,8 +11,8 @@ params = {
                 "request": "update",
                 "data": {
                     "id" : '36',
-                    "oldPassword": "71237**123712383",
-                    "newPassword": "abcd" 
+                    "newPassword": "71237**123712383",
+                    "oldPassword": "abcd" 
                 }
             }
 # res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=dictToSend)
