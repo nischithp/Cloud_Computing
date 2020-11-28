@@ -5,7 +5,8 @@
     <orderEntry type="jdk" jdkName="Python 3.8" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
-  <component name="TestRunnerService">
-    <option name="PROJECT_TEST_RUNNER" value="Unittests" />
+  <component name="PackageRequirementsSettings">
+    <option name="requirementsPath" value="D:\Study\3rd Sem\CC\Project\Cloud_Computing\functions\upload\requirements.txt" />
+    <option name="removeUnused" value="true" />
   </component>
 </module>
