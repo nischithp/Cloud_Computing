@@ -12,8 +12,8 @@
 # below:
 .git
 .gitignore
-/functions
-/extras
+functions
+extras
 
 # Python pycache:
 __pycache__/
