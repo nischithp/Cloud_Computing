@@ -1,2 +1,8 @@
 cloud_sql_proxy -instances=cloudcomputinglab-291822:us-central1:cloud-computing=tcp:3306
 functions-framework --target=user_access
+
+gcloud builds submit --tag gcr.io/cloudcomputinglab-291822/cloud-computing-front .
+
+    # print("request.method: ", request.method)
+    # print("request.method: ", request.method)
+    # print("request.headers: ", request.headers)
