@@ -19,3 +19,8 @@ class LoginForm(Form):
   remember_me = BooleanField('Keep me logged in')
   submit = SubmitField('Log in')
 
+class EditProfileForm(Form):
+  oldPassword = PasswordField('Old Password', [validators.InputRequired()])
+  newPassword = PasswordField('New Password', [validators.InputRequired()])
+  confirm = PasswordField('Repeat Password',  [validators.DataRequired(),validators.EqualTo('newPassword', message='Passwords must match')])
+  submit = SubmitField('Change Password')
