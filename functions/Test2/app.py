@@ -121,7 +121,6 @@ def upload():
 
         else:
             try:
-                thumbnail_bucket_name = "videos_thumbnail"
                 bucket_name = "videos_360"
                 # source_file_name = "local/path/to/file"
                 print(file.filename)
@@ -174,6 +173,6 @@ def upload():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', '5000'))
+    port = int(os.getenv('PORT', '8080'))
     app.run(debug=True, port=port)
     # app.run(host='0.0.0.0', port=port)
