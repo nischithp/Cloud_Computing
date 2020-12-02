@@ -1,4 +1,3 @@
-import datetime
 import hashlib
 from hashlib import new
 import json
@@ -63,6 +62,8 @@ def login():
 
 def putDataIntoSession(data):
     if "username" in data["data"]:
+        print (data)
+        session['id'] = data["data"]["id"]
         session['username'] = data["data"]['username']
         session['firstname'] = data["data"]['firstname']
         session['lastname'] = data["data"]['lastname']
@@ -121,7 +122,24 @@ def editprofile():
             }
             res = requests.post(userDataCloudURL, json=params)
             data = {}
-            data = json.loads(res.text)
+            if res.status_code == 200:
+                # Success
+                print(data)
+                data = json.loads(res.text)
+            elif res.status_code == 500:
+                # INternl Server Error
+                data = json.loads(res.text)
+            elif res.status_code == 422:
+                # Missing or Invalid Data
+                data = json.loads(res.text)
+            elif res.status_code == 401:
+                # old and new passwords do not match
+                data = json.loads(res.text)
+            elif res.status_code == 404:
+                # You can only login, register or editProfile
+                data = json.loads(res.text)
+            print("Response:"+res.text)
+            # data = json.loads(res.text)
             status = res.status_code
             return data
     return render_template(editprofileURL, form=form)
@@ -129,4 +147,4 @@ def editprofile():
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '8080'))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=False, host='0.0.0.0', port=port)
