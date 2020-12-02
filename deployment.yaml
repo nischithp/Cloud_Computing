@@ -1,22 +1,22 @@
 # This file configures the hello-world app which serves public web traffic.
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: lab3
+  name: helloworld-gke
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: pong
+      app: hello
   template:
     metadata:
       labels:
-        app: pong
+        app: hello
     spec:
       containers:
-      - name: pong-app
+      - name: hello-app
         # Replace $GCLOUD_PROJECT with your project ID
-        image: gcr.io/$cloudcomputinglab-291822/Lab3:latest
+        image: gcr.io/cloudcomputinglab-291822/helloworld-gke:latest
         # This app listens on port 8080 for web traffic by default.
         ports:
         - containerPort: 8080
