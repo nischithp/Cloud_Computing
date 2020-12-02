@@ -6,7 +6,6 @@ from datetime import time
 from flask.helpers import flash
 
 import requests
-<<<<<<< HEAD
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from requests.api import post
 # from requests.sessions import session
@@ -14,12 +13,6 @@ from flask_bootstrap import Bootstrap
 from PIL import Image
 from google.cloud import storage
 from moviepy.editor import VideoFileClip
-=======
-from flask import Flask, render_template, request, session
-from requests.api import post
-# from requests.sessions import session
-from flask_bootstrap import Bootstrap
->>>>>>> 397d3bcc6027ad33e1fd18b0a9d65c53ab881242
 
 
 from models import EditProfileForm, LoginForm, RegForm
@@ -246,4 +239,4 @@ def view():
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '8080'))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)

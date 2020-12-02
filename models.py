@@ -24,9 +24,3 @@ class EditProfileForm(Form):
   newPassword = PasswordField('New Password', [validators.InputRequired()])
   confirm = PasswordField('Repeat Password',  [validators.DataRequired(),validators.EqualTo('newPassword', message='Passwords must match')])
   submit = SubmitField('Change Password')
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 397d3bcc6027ad33e1fd18b0a9d65c53ab881242

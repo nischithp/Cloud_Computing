@@ -60,12 +60,25 @@ body {
 
 /* Footer */
 
-footer {
-  background-color: rgb(255, 251, 0);
-  position: absolute;
+.footer {
+  position: fixed;
   left: 0;
   bottom: 0;
-  height: 100px;
   width: 100%;
-  overflow: hidden;
+  background-color: rgb(251,251,0);
+  color: rgb(0, 0, 0);
+  text-align: center;
+}
+
+/* Video Player */
+.video-player {
+  width: 600px;
+  height: 600px;
+  align-content: center;
+  width: 100%;
+  height: auto;
+}
+.video-js {
+  width: 600px;
+  height: 600px;
 }

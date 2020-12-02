@@ -24,6 +24,8 @@
         <a href="#">Favorites</a>
         {% elif session.loggedin %}
         <a href="logout"> Logout </a>
+        <a href="/"> Home </a>
+        <a href="/upload"> Upload</a>
         <a href="editProfile">Edit Profile</a>
         {% endif %}
         <a href="#">About Us</a>
@@ -65,8 +67,12 @@
 
     </div>
 
+
+
+    </div>
+
     <!-- Footer -->
-    <footer class="page-footer font-small blue">
+    <footer class="footer">
 
         <!-- Copyright -->
         <div class="footer-copyright text-center py-3">© Developed in 2020 with &#9825 by
@@ -76,10 +82,6 @@
         <!-- Copyright -->
 
     </footer>
-
-    </div>
-
-
 
     <script>
         function openNav() {
