@@ -6,10 +6,20 @@ from datetime import time
 from flask.helpers import flash
 
 import requests
+<<<<<<< HEAD
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify
+from requests.api import post
+# from requests.sessions import session
+from flask_bootstrap import Bootstrap
+from PIL import Image
+from google.cloud import storage
+from moviepy.editor import VideoFileClip
+=======
 from flask import Flask, render_template, request, session
 from requests.api import post
 # from requests.sessions import session
 from flask_bootstrap import Bootstrap
+>>>>>>> 397d3bcc6027ad33e1fd18b0a9d65c53ab881242
 
 
 from models import EditProfileForm, LoginForm, RegForm
@@ -144,6 +154,95 @@ def editprofile():
             return data
     return render_template(editprofileURL, form=form)
 
+url = 'http://127.0.0.1:8080/'
+dictToSend = {"data": {"email": "aaa@gmial.com",
+                       "password": "71237**123712383",
+                       "username": "123",
+                       "firstname": "123",
+                       "lastname": "123"},
+              "request": "login"}
+
+ALLOWED_SIZE = 100*1024*1024*1024
+ALLOWED_EXTENSIONS = set(['mpg', 'mpeg', 'mp4'])
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        file = request.files['file']
+        size = request.content_length
+
+        if not file:
+            print("No File to Upload.")
+            status="No File to Upload."
+
+        elif size > ALLOWED_SIZE:
+            print ("File size more then 10Mb.")
+            status="File size more then 10Mb."
+
+        elif '.' in file.filename and file.filename.split('.', 1)[1] not in ALLOWED_EXTENSIONS:
+            print("This file extesion not allowed.")
+            status="This file extesion not allowed."
+
+        else:
+            try:
+                thumbnail_bucket_name = "videos_thumbnail"
+                bucket_name = "videos_360"
+                # source_file_name = "local/path/to/file"
+                print(file.filename)
+
+                destination_blob_name = file.filename
+
+                # Creating thumbnail file:
+
+                print(file.stream)
+
+
+                # vs = file.stream
+                # image_name = destination_blob_name.split('.')[0] + '.jpeg'
+                # frame = vs.get_frame_at_sec(10)
+                # img = frame.image()
+                # img = img.resize((300, 300))
+                # img.save('{0}.jpeg'.format(image_name))
+
+                # linking storage
+                storage_client = storage.Client.from_service_account_json(
+                    'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
+                # storage_client = storage.Client.from_service_account_json(
+                #     'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
+
+                # Uploading thumbnail
+                # Setting destination name
+                thumbnail_bucket = storage_client.bucket(thumbnail_bucket_name)
+                # thumbnail_blob = thumbnail_bucket.blob(image_name)
+
+                # thumbnail_blob.upload_from_file(img)
+
+                # uploading video file
+                bucket = storage_client.bucket(bucket_name)
+                blob = bucket.blob(destination_blob_name)
+
+                blob.upload_from_file(file)
+
+                print(
+                    "File {} uploaded to {}.".format(
+                        file.filename, destination_blob_name
+                    )
+                )
+
+                filename = file.filename,
+                status = "Uploaded"
+
+            except Exception as e:
+                print(e)
+                status="Failed to upload. Some error occured."
+
+        return render_template('upload.html', message=status)
+    return render_template('upload.html')
+
+@app.route('/view/', methods=['GET', 'POST'])
+def view():
+    return render_template('view.html')
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '8080'))
