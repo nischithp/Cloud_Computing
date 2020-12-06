@@ -30,7 +30,19 @@ userDataCloudURL = 'https://us-central1-cloudcomputinglab-291822.cloudfunctions.
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template(indexURL)
+    # linking storage
+    storage_client = storage.Client.from_service_account_json(
+                    'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
+    bucket_name = "videos_360"
+    videoNames = storage_client.list_blobs(bucket_name)
+
+    bucket_name="videos_thumbnail"
+    thumbnails = storage_client.list_blobs(bucket_name)
+
+    # for blob in blobs:
+    #     print(blob.name)    
+    return render_template(indexURL, videoNames=videoNames, thumbnails=thumbnails)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -94,11 +106,12 @@ def registration():
         data = {}
         data = json.loads(res.text)
         status = res.status_code
-        if( status == 200):
+        if status == 200:
+            flash("Succesful registration. Please proceed to login")
             return render_template(loginURL)
         elif status == 403:
             flash("Email already in use. Please use another email")
-        elif(status==500):
+        elif status == 500:
             return ("500 error. Please contact your server administrator.")
     return render_template(registerURL, form=form)
 
@@ -228,14 +241,20 @@ def upload():
 
             except Exception as e:
                 print(e)
-                status="Failed to upload. Some error occured."
+                status="Failed to upload. An error occured."
 
         return render_template('upload.html', message=status)
     return render_template('upload.html')
 
-@app.route('/view/', methods=['GET', 'POST'])
-def view():
-    return render_template('view.html')
+@app.route('/view/<videoName>', methods=['GET', 'POST'])
+def view(videoName):
+    if request.method == 'GET':
+        print("data is:")
+        print(videoName)
+        videoData = {"videoQuality" : 360,
+                 "videoName": videoName}
+        return render_template('view.html', videoData=videoData)
+    return ("this page can only be reached with a POST request. Please click on a thumbnail on the home page")
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '8080'))

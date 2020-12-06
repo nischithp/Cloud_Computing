@@ -82,3 +82,20 @@ body {
   width: 600px;
   height: 600px;
 }
+
+/* Video Row and Column thumbnails */
+/* Three image containers (use 25% for four, and 50% for two, etc) */
+.video-column {
+  float: left;
+  width: 25%;
+  padding: 10px;
+  border-color: #000000;
+  /* border-radius: 25%; */
+}
+
+/* Clear floats after image containers */
+.video-row::after {
+  content: "";
+  clear: both;
+  display: table;
+}

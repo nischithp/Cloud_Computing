@@ -37,7 +37,7 @@ def upload(request):
 
     # storage_client = storage.Client()
     storage_client = storage.Client.from_service_account_json(
-        'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
+        'C:\Users\nisch\Downloads\cloudcomputinglab-291822-bf0774247e88.json')
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
 
