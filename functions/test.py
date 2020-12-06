@@ -1,18 +1,20 @@
 import requests
 import json
-dictToSend = {"data": {"email": "a123aaa@gmial.com",
-                       "password": "71237**123712383",
-                       "username": "123",
-                       "firstname": "123",
-                       "lastname": "123"},
-              "request": "login"}
+# dictToSend = {"data": {"email": "a123aaa@gmial.com",
+#                        "password": "71237**123712383",
+#                        "username": "123",
+#                        "firstname": "123",
+#                        "lastname": "123"},
+#               "request": "login"}
 
 params = {
-                "request": "update",
-                "data": {
-                    "id" : '36',
-                    "newPassword": "71237**123712383",
-                    "oldPassword": "abcd" 
+                "userid": 7,
+                "video": {
+                    "title" : 'cat',
+                    "url": 1,
+                    "tag": "abcd",
+                    "description": "asdasdas",
+                    "privecy": "00000000000012"
                 }
             }
 # res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=dictToSend)

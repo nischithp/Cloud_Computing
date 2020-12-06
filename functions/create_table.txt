@@ -14,7 +14,7 @@
     # db.execute("CREATE TABLE videos ("
     #            "id INT(14) PRIMARY KEY AUTO_INCREMENT,"
     #            "title VARCHAR(1023) NOT NULL,"
-    #            "URL VARCHAR(1023) NOT NULL,"
+    #            "url VARCHAR(1023) NOT NULL,"
     #            "uploaded_by INT(12),"
     #            "views INT(11) NOT NULL DEFAULT 0,"
     #            "tags VARCHAR(511) DEFAULT NULL,"

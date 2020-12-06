@@ -5,8 +5,63 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 import json
 
+'''
+Called by HTTP request,
+input JSON: Contains userid and information about video uploaded
+    {
+        "userid": 7,
+        "video": {
+            "title" : 'cat',
+            "url": 1,
+            "tag": "abcd",              (optional)
+            "description": "asdasdas",  (optional)
+            "privecy": "00000000000012" (optional)
+        }
+    }
+Enters user video details in SQL database and creates video thumbnail.
+'''
 
-def user_access(request):
+def upload(request):
+
+    error = {"bad request": {"status": "fail", "status_code": 400,
+                             "error": "No JSON, request should include JSON object"},
+             "unauthorised": {"status": "fail", "status_code": 401,
+                              "error": "Incorrect password, please enter correct password"},
+             "forbidden": {"status": "fail", "status_code": 403,
+                           "error": "user doesn't exist, this user info is not present in database"},
+             "not found": {"status": "fail", "status_code": 404,
+                           "error": "User Not found, User does not exists in data base"},
+             "bad method": {"status": "fail", "status_code": 405,
+                            "error": "Method not allowed, please use post method"},
+             "unacceptable": {"status": "fail", "status_code": 406,
+                              "error": "Request is not acceptable, accepted requests are login, register and update"},
+             "empty field": {"status": "fail", "status_code": 406,
+                             "error": "Request is not acceptable, user information can not be empty"},
+             "unprocessable": {"status": "fail", "status_code": 422, "error": "JSON format is not correct"},
+             "internal": {"status": "fail", "status_code": 500, "error": "Unexpected error in our database/server"}}
+
+    if request.method != "POST":
+        return jsonify(error["bad method"]), error["bad method"]["status_code"]
+
+    request_json = request.get_json(silent=True)
+    if isinstance(request_json, str):
+        request_json = json.loads(request_json)
+    elif type(request_json) != dict:
+        return jsonify(error["bad request"]), error["bad request"]["status_code"]
+    if not request_json:
+        return jsonify(error["bad request"]), error["bad request"]["status_code"]
+
+    necessary_info = ["userid", "video"]
+    if not all(info in request_json for info in necessary_info):
+        return jsonify(error["unprocessable"]), error["unprocessable"]["status_code"]
+
+    necessary_info = ["title", "url"]
+    if not all(info in request_json["video"] for info in necessary_info):
+        return jsonify(error["unprocessable"]), error["unprocessable"]["status_code"]
+
+    if not all(request_json["video"][info] for info in necessary_info):
+        return jsonify(error["empty field"]), error["empty field"]["status_code"]
+
     # --------------Local testing connection string starts here---------------
     mysql = {"database": "video_sharing",
              "host": "35.232.179.75",
@@ -44,193 +99,59 @@ def user_access(request):
 
     db = scoped_session(sessionmaker(bind=eng))
 
-    error = {"bad request": {"status": "fail", "status_code": 400,
-                             "error": "No JSON, request should include JSON object"},
-             "unauthorised": {"status": "fail", "status_code": 401,
-                              "error": "Incorrect password, please enter correct password"},
-             "forbidden": {"status": "fail", "status_code": 403,
-                           "error": "Duplicate email, email id already exists"},
-             "not found": {"status": "fail", "status_code": 404,
-                           "error": "User Not found, User does not exists in data base"},
-             "bad method": {"status": "fail", "status_code": 405,
-                            "error": "Method not allowed, please use post method"},
-             "unacceptable": {"status": "fail", "status_code": 406,
-                              "error": "Request is not acceptable, accepted requests are login, register and update"},
-             "empty field": {"status": "fail", "status_code": 406,
-                             "error": "Request is not acceptable, user information can not be empty"},
-             "unprocessable": {"status": "fail", "status_code": 422, "error": "JSON format is not correct"},
-             "internal": {"status": "fail", "status_code": 500, "error": "Unexpected error in our database/server"}}
-
-    if request.method != "POST":
-        return jsonify(error["bad method"]), error["bad method"]["status_code"]
-
-    request_json = request.get_json(silent=True)
-    if isinstance(request_json, str):
-        request_json = json.loads(request_json)
-    elif type(request_json) != dict:
-        return jsonify(error["bad request"]), error["bad request"]["status_code"]
-    if not request_json:
-        return jsonify(error["bad request"]), error["bad request"]["status_code"]
-
-    necessary_info = ["request", "data"]
-    if not all(info in request_json for info in necessary_info):
-        return jsonify(error["unprocessable"]), error["unprocessable"]["status_code"]
-
-    check_user_query = sqlalchemy.text("SELECT 1 FROM users WHERE email = :email")
+    check_user_query = sqlalchemy.text("SELECT 1 FROM users WHERE id = :id")
     get_user_query = sqlalchemy.text("SELECT id, username, firstname, lastname, email, date_time"
-                                     " FROM users WHERE email = :email AND password = :password")
-    update_user_query = sqlalchemy.text("SELECT * FROM users")
+                                     " FROM users")
+    get_videos_query = sqlalchemy.text("SELECT * FROM videos")
+    try:
+        # user_in_db = db.execute(check_user_query, {"id": request_json["userid"]}).fetchall()
+        user_in_db = db.execute(get_user_query).fetchall()
 
-    if request_json["request"].lower() == "login":
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
-        necessary_info = ["email", "password"]
-        if not all(info in request_json["data"] for info in necessary_info):
-            return jsonify(error["unprocessable"]), error["unprocessable"]["status_code"]
+    for user in user_in_db:
+        print(user.id)
 
-        if not all(request_json["data"][info] for info in necessary_info):
-            return jsonify(error["empty field"]), error["empty field"]["status_code"]
+    if not user_in_db:
+        return jsonify(error["forbidden"]), error["forbidden"]["status_code"]
 
-        try:
-            if db.execute(check_user_query, {"email": request_json["data"]["email"]}).fetchall():
-                user = db.execute(get_user_query, request_json["data"]).fetchone()
-                if user:
-                    user = {"id": user[0], "username": user[1], "firstname": user[2],
-                            "lastname": user[3], "email": user[4], "date_time": user[5]}
-                    return jsonify({"status": "success", "status_code": 200, "data": user})
-                else:
-                    return jsonify(error["unauthorised"]), error["unauthorised"]["status_code"]
-            else:
-                return jsonify(error["not found"]), error["not found"]["status_code"]
-
-        except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
-            return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
-    elif request_json["request"].lower() == "register":
-
-        necessary_info = ["username", "firstname", "email", "password"]
-        if not all(info in request_json["data"] for info in necessary_info):
-            return jsonify(error["unprocessable"]), error["unprocessable"]["status_code"]
-
-        if not all(request_json["data"][info] for info in necessary_info):
-            return jsonify(error["empty field"]), error["empty field"]["status_code"]
-
-        try:
-            user_in_db = db.execute(check_user_query, {"email": request_json["data"]["email"]}).fetchall()
-
-        except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
-            return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
-        if user_in_db:
-            return jsonify(error["forbidden"]), error["forbidden"]["status_code"]
-
-        if "lastname" in request_json["data"] and request_json["data"]["lastname"]:
-            insert_with_lastname_query = sqlalchemy.text("INSERT INTO users (username, email, "
-                                                         "firstname, lastname, password) "
-                                                         "VALUES (:username, :email, :firstname, "
-                                                         ":lastname, :password)")
-            try:
-                db.execute(insert_with_lastname_query,
-                           request_json["data"])
-                db.commit()
-
-            except SQLAlchemyError as e:
-                error = str(e.__dict__['orig'])
-                return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
+    data = {"uploaded_by": request_json["userid"], "title": request_json["video"]["title"], "url": request_json["video"]["url"]}
+    optional = ["tags", "description"]
+    for info in optional:
+        if info in request_json["video"]:
+            data[info] = request_json["video"][info]
         else:
-            insert_without_lastname_query = sqlalchemy.text("INSERT INTO users (username, email, firstname, password)"
-                                                            "VALUES (:username, :email, :firstname, :password)")
-            try:
-                db.execute(insert_without_lastname_query,
-                           request_json["data"])
-                db.commit()
+            data[info] = None
 
-            except SQLAlchemyError as e:
-                error = str(e.__dict__['orig'])
-                return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
-        try:
-            user = db.execute(get_user_query, request_json["data"]).fetchone()
-
-        except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
-            return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
-        if user:
-            user = {"id": user[0], "username": user[1], "firstname": user[2],
-                    "lastname": user[3], "email": user[4], "date_time": user[5]}
-            return jsonify({"status": "success", "status_code": 201, "data": user}), 201
-        else:
-            return jsonify(error["unauthorised"]), error["unauthorised"]["status_code"]
-
-    # To handle the update operations for the API
-    elif request_json["request"].lower() == "update":
-        userID = request_json["data"]["id"]
-        oldPassword = request_json["data"]["oldPassword"]
-        newPassword = request_json["data"]["newPassword"]
-        password_compare_query = sqlalchemy.text(
-            "select id from users where id=" + userID + " and password='" + oldPassword + "'")
-        passwordUpdateQuery = sqlalchemy.text("UPDATE users SET password='" + newPassword + "' WHERE id=" + userID)
-
-        # Check to see if the old and new passwords are same. If not, do not even proceed further.
-        try:
-            comparisonResult = db.execute(password_compare_query).fetchone()
-            print(comparisonResult)
-        except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
-            return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
-        # Check if comaparisonResult is set from the earlier query. If it is, then execute the update query and commit the transaction, else send a 401 response.
-        if comparisonResult:
-            try:
-                updateResult = db.execute(passwordUpdateQuery)
-                db.commit()
-            except SQLAlchemyError as e:
-                error = str(e.__dict__['orig'])
-                return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
-            print(updateResult)
-            # Check to see if the cursor's updated rows is 1, to denote succesful update, else send error
-            if updateResult:
-                return jsonify({"status": "success", "status_code": 200, "data": "password updated"}), 200
-            else:
-                return jsonify({"status": "fail", "status_code": 422, "error": "Missing or Invalid Data"}), 422
-
-        else:
-            return jsonify(
-                {"status": "unauthorized", "status_code": 401, "error": "old and new passwords do not match"}), 401
+    if "privacy" in request_json["video"] and request_json["video"]["privacy"]:
+        data["privacy"] = request_json["video"]["privacy"]
     else:
-        return jsonify(
-            {"status": "Error", "status_code": 404, "error": "You can only login, register or editProfile"}), 404
+        data["privacy"] = 0
 
-    #
-    # tables = db.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")
-    # return jsonify([{key: value for key, value in row.items()} for row in tables if row is not None]), 200
+    insert_with_lastname_query = sqlalchemy.text("INSERT INTO videos (title, url, uploaded_by, "
+                                                 "tags, description, privacy) "
+                                                 "VALUES (:title, :url, :uploaded_by, "
+                                                 ":tags, :description, :privacy)")
+    print(insert_with_lastname_query)
+    try:
+        db.execute(insert_with_lastname_query, data)
+        db.commit()
 
-    user = {"username": "Naveen",
-            "email": "naveensn100@gmail.com",
-            "firstname": "Naveen",
-            "lastname": "Navn",
-            "password": "asodasnasidndai"
-            }
-    #
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
-    # db.execute("INSERT INTO users (id, username, email, firstname, lastname, password) ",
-    #            "VALUES (, 'naveen', 'naveensn100@gmail.com', 'Naveen', 'S Na', 'asdasaxasdxasda')")
-    # db.commit()
+    try:
+        videos_in_db = db.execute(get_videos_query).fetchall()
 
-    db.execute("INSERT INTO users (username, email, firstname, lastname, password) "
-               "VALUES (:username, :email, :firstname, :lastname, :password)",
-               user)
-    db.commit()
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
-    stmt = sqlalchemy.text("SELECT * from users")
-    users = db.execute(stmt).fetchall()
-    if users is not None:
-        return jsonify([{key: value for key, value in row.items()} for row in users if row is not None]), 200
-    else:
-        return jsonify([{}])
 
-    # return jsonify({'greeting': 'Hello {}!'.format(escape(name + method))})
+    for video in videos_in_db:
+        print(video)
+
+    return "success"
