@@ -249,12 +249,10 @@ def upload():
 @app.route('/view/<videoName>', methods=['GET', 'POST'])
 def view(videoName):
     if request.method == 'GET':
-        print("data is:")
-        print(videoName)
         videoData = {"videoQuality" : 360,
                  "videoName": videoName}
         return render_template('view.html', videoData=videoData)
-    return ("this page can only be reached with a POST request. Please click on a thumbnail on the home page")
+    return ("this page can only be reached with a GET request. Please click on a thumbnail on the home page")
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '8080'))
