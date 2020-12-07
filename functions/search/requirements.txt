@@ -1,0 +1,8 @@
+flask
+SQLAlchemy
+PyMySQL
+flask_sqlalchemy
+pymysql
+PLI
+google-cloud-storage
+opencv-python
