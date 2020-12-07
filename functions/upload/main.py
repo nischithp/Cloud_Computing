@@ -8,6 +8,8 @@ from sqlalchemy.exc import SQLAlchemyError
 import json
 import datetime
 import os
+import urllib.request as req
+import cv2
 
 '''
 Called by HTTP request,
@@ -105,12 +107,10 @@ def upload(request):
 
     db = scoped_session(sessionmaker(bind=eng))
 
-    check_user_query = sqlalchemy.text("SELECT 1 FROM users WHERE id = :id")
     get_user_query = sqlalchemy.text("SELECT id, username, firstname, lastname, email, date_time"
                                      " FROM users")
-    get_videos_query = sqlalchemy.text("SELECT * FROM videos")
+
     try:
-        # user_in_db = db.execute(check_user_query, {"id": request_json["userid"]}).fetchall()
         user_in_db = db.execute(get_user_query).fetchall()
 
     except SQLAlchemyError as e:
@@ -123,7 +123,8 @@ def upload(request):
     if not user_in_db:
         return jsonify(error["forbidden"]), error["forbidden"]["status_code"]
 
-    data = {"uploaded_by": request_json["userid"], "title": request_json["video"]["title"], "url": request_json["video"]["url"]}
+    data = {"uploaded_by": request_json["userid"], "title": request_json["video"]["title"],
+            "url": request_json["video"]["url"]}
     optional = ["tags", "description"]
     for info in optional:
         if info in request_json["video"]:
@@ -136,31 +137,17 @@ def upload(request):
     else:
         data["privacy"] = 0
 
-    insert_with_lastname_query = sqlalchemy.text("INSERT INTO videos (title, url, uploaded_by, "
-                                                 "tags, description, privacy) "
-                                                 "VALUES (:title, :url, :uploaded_by, "
-                                                 ":tags, :description, :privacy)")
-    print(insert_with_lastname_query)
+    insert_query = sqlalchemy.text("INSERT INTO videos (title, url, uploaded_by, tags, description, privacy)"                                   ""
+                                   "VALUES (:title, :url, :uploaded_by, :tags, :description, :privacy)")
     try:
-        db.execute(insert_with_lastname_query, data)
+        db.execute(insert_query, data)
         db.commit()
 
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
         return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
-    try:
-        videos_in_db = db.execute(get_videos_query).fetchall()
-
-    except SQLAlchemyError as e:
-        error = str(e.__dict__['orig'])
-        return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
-
-    for video in videos_in_db:
-        print(video)
-
-    """Uploads a file to the bucket."""
+    """Create and Uploads thumbnail to the bucket."""
     bucket_name = "videos_360"
     thumbnail_bucket_name = "videos_thumbnail"
     destination_blob_name = request_json["video"]["url"]
@@ -170,10 +157,6 @@ def upload(request):
         'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.get_blob(destination_blob_name)
-    print(blob)
-
-    import urllib.request as req
-    import cv2
 
     url = blob.generate_signed_url(datetime.timedelta(seconds=300), method='GET')
     req.urlretrieve(url, destination_blob_name)
@@ -187,5 +170,7 @@ def upload(request):
         cv2.waitKey(0)
         thumbnail_blob.upload_from_filename(image_name)
         os.remove(image_name)
+        cap.release()
+        os.remove(destination_blob_name)
 
     return "success"

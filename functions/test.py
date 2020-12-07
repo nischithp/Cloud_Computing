@@ -26,8 +26,8 @@ dictToSend = {"data": {"email": "a123aaa@gmial.com",
 #             }
 params = {"search": "cat"}
 
-# res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=dictToSend)
-res = requests.post('http://127.0.0.1:8080/', json=params)
+res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/search', json=params)
+# res = requests.post('http://127.0.0.1:8080/', json=params)
 
 print(res.text, res.status_code)
 
