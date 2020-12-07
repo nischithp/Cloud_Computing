@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "cloudcomputinglab-291822",
+  "private_key_id": "bf0774247e882c3226cc5374c8e7dc9e04e88c2a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQCamxGGZ0RI5C5W\nF2O1mDNfBwsJQUNkvo0YM0ZAR4XoIMYTRFkQZZV6ETR0GkgebYubr2lwwi1uIEW4\nMCTonh5G0mHWTP3W63cKNbdj8fOkbohbmD0QuE7EIu+HNV0WJknpW88w+qWV39n0\nTfleflriC6ZF9vxWmWJzTy6qHAk3YbF1fMA0W+tdIF4t1WYnh5f/rGMB1NsAbu4q\nscE3UjgeBn0LCZlrqtL43Um35OYYJieA4FyM+lYyNk342D6q4StBHnSRJdr0heIU\nDaO+UHwiTF+8SjTvWpZ/ciE4R0BCGzUSAm0xXNqGiim0EyrmwFVLxRwaAAUDwlju\nbrkKpkFdAgMBAAECgf8tslJ7vLTHgVTbcrkF86E7dS7N4tGzSp8UMr47luhStAfX\nqgapJ11cYbl0l6VkA6eVXJjNu0GySyz67pVPgWzG12gTmgNtLYEB2N6xASgCcf6G\naXj4eCwlIi5UyHEQcEC9uLqEv5DcZk2wPVvM54v1RCbhMcoOeUegIsdS1aE5EjEU\nlbYZ3V4OjJLHfR3CWMugkjWqSSRyuPB+qkn7Gx5ouPs93/75mD4BYVCEbPj644Gr\n0ulANtD3m5C7mAwnD7N5fvB5ThLjnZDUspnZsXaUgc/T5/PyIse7xAXYt8DkFlRP\nQ+n/1brZGY0BnB8KEShiuHXHfgSUKZkIrc4eh8ECgYEA1yyep+YkQ3PP+0nLrNbw\nXa3FhAd9SX65co5iV11QxDLTkUiwUGTg2Qfklaao/K4h7Hn91tmWiswPTZjE44Jq\nKUCACBlihXwavs3WWBTOg4BfXpDP+0dmUXpBe38w7vanyFitiU5zL48SahQfHRBu\n51uj3Q6c/zMv95LEx+ryM00CgYEAt/CH9mh2WlyglIdaJd4/pGqZm6QVrpnZYzFi\nMGfk6/lExYlRtu0bkUkWEgSUeYWNTE3xd+o51zDXYnc4MAiFCTYVsVz/geyAJ2co\nTTD4c8K7L2cTNsYaaYztzoGTuT5071QT2fgPzL6HUL78pQPrQ861gQTIFDw50XgM\nmdeFHlECgYAPfLGqqgDgLfzBPG2BcjL4uyIlP5i/6nQUj7T6TsgaZwIdSdsO3kPk\nuxGzx7wP+8SLTbh8d0rDkK5lSmKZcXCMqYzNiG4z51vRceVEj7LRejLjDo85qcju\nglsmNWBjQrOO0vsij9fwi16q7enTYLRqyIjBx2R7ZcbFDfZF4V4vXQKBgFxkZncA\nG8rh0gspPb/dtgwJO6UxM27jeo1XpeF4nkVljQTIKBKBYSKGGp7sTAQKcGIOmKbK\nMUmFD/s2tTNzZBevYhAYDYOeXvTr3ROA8Jt9CfcSiFUwBt5T2rOq5J/c3nHEwr/u\n2UjXvzJw7IiawlbqAsOOuk1nvwcXjQTNe+ExAoGBAMitSYScPNSw5pLR40I9vEEJ\nvgp8cgZSXvDicbymNWYg4t28eIUgcFuUMDoXq6nH+5XESOysBVJkyiRMIV4XG124\nxHb2qUMPy1NBIvs0+CqrIQra6i+GJRsLnYTtMDSWuv+RSEnZ9UEUVoKvOVULHImx\n9ruBx7ptFmvL7m8XpqOf\n-----END PRIVATE KEY-----\n",
+  "client_email": "cloudcomputinglab-291822@appspot.gserviceaccount.com",
+  "client_id": "110727232082827411742",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cloudcomputinglab-291822%40appspot.gserviceaccount.com"
+}

@@ -221,10 +221,10 @@ def upload():
                 print(destination_blob_name)
 
                 # linking storage
-                storage_client = storage.Client()
+                # storage_client = storage.Client()
                 
-                # storage_client = storage.Client.from_service_account_json(
-                #     'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
+                storage_client = storage.Client.from_service_account_json(
+                    'cloudcomputinglab-291822-bf0774247e88.json')
                 # storage_client = storage.Client.from_service_account_json(
                 #     'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
 
