@@ -3,6 +3,7 @@ from google.cloud import storage
 from moviepy.editor import VideoFileClip
 import os
 from PIL import Image
+
 # from helper import create_thumbmail, upload_file
 
 app = Flask(__name__)
@@ -15,9 +16,8 @@ dictToSend = {"data": {"email": "aaa@gmial.com",
                        "lastname": "123"},
               "request": "login"}
 
-ALLOWED_SIZE = 100*1024*1024*1024
+ALLOWED_SIZE = 100 * 1024 * 1024 * 1024
 ALLOWED_EXTENSIONS = set(['mpg', 'mpeg', 'mp4'])
-
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -29,8 +29,6 @@ def index():
             print(f)
             """Uploads a file to the bucket."""
             bucket_name = "video_360"
-            # source_file_name = "local/path/to/file"
-            print(f.filename)
 
             destination_blob_name = f.filename
 
@@ -109,15 +107,15 @@ def upload():
 
         if not file:
             print("No File to Upload.")
-            status="No File to Upload."
+            status = "No File to Upload."
 
         elif size > ALLOWED_SIZE:
-            print ("File size more then 10Mb.")
-            status="File size more then 10Mb."
+            print("File size more then 10Mb.")
+            status = "File size more then 10Mb."
 
         elif '.' in file.filename and file.filename.split('.', 1)[1] not in ALLOWED_EXTENSIONS:
             print("This file extesion not allowed.")
-            status="This file extesion not allowed."
+            status = "This file extesion not allowed."
 
         else:
             try:
@@ -130,7 +128,6 @@ def upload():
                 # Creating thumbnail file:
 
                 print(file.stream)
-
 
                 # vs = file.stream
                 # image_name = destination_blob_name.split('.')[0] + '.jpeg'
@@ -167,10 +164,11 @@ def upload():
 
             except Exception as e:
                 print(e)
-                status="Failed to upload. Some error occured."
+                status = "Failed to upload. Some error occured."
 
         return render_template('index.html', message=status)
     return render_template('index.html')
+
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '8080'))
