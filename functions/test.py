@@ -21,7 +21,7 @@ params = {
                     "url": "Naveen - Rating Predictor.mp4",
                     "tag": "abcd",
                     "description": "asdasdas",
-                    "privecy": "00000000000012"
+                    "privacy": "00000000000012"
                 }
             }
             

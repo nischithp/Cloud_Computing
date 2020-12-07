@@ -53,8 +53,8 @@
           {% for videoName in videoNames: %}
           <a href="/view/{{ videoName.name }}">
             <div class="video-column">
-              <img src="https://storage.cloud.google.com/video-thumbnails/{{videoName.name}}" style="width:100%">
-              {{videoName.name }}
+              <img src="https://storage.cloud.google.com/videos_thumbnail/{{ videoName.name.split('.')[0] }}.jpeg" style="width:100%">
+              {{ videoName.name }}
             </div>
           </a>
           {% endfor %}

@@ -196,8 +196,8 @@ def upload():
         else:
             try:
                 bucket_name = "videos_360"
-
-                destination_blob_name = str(session['id'])+ '-' + str(datetime.now()) + '.' + file.filename.split('.')[-1]
+                timestr = time.strftime("%Y%m%d-%H%M%S")
+                destination_blob_name = str(session['id'])+ '-' + datetime.now().strftime("%Y%m%d%H%M%S") + '.' + file.filename.split('.')[-1]
                 print(destination_blob_name)
 
                 # linking storage

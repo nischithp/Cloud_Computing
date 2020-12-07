@@ -170,6 +170,7 @@ def upload(request):
         'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
     bucket = storage_client.bucket(bucket_name)
     destination_blob_name = request_json["video"]["url"]
+    print("Destination Blob name:")
     print(destination_blob_name)
     blob = bucket.get_blob(request_json["video"]["url"])
     print(blob)
@@ -178,10 +179,13 @@ def upload(request):
     import cv2
 
     url = blob.generate_signed_url(datetime.timedelta(seconds=300), method='GET')
-    req.urlretrieve(url, request_json["video"]["url"])
-    cap = cv2.VideoCapture(request_json["video"]["url"])
+    videoDownloaded = req.urlretrieve(url)
+    print("Video downloaded",videoDownloaded[0])
+    cap = cv2.VideoCapture(videoDownloaded[0]+".mp4")
+    ret, frame = cap.read()
+    print("Frame:")
+    print(frame)
     if cap.isOpened():
-        ret, frame = cap.read()
         bucket = storage_client.bucket("videos_thumbnail")
         blob = bucket.blob(request_json["video"]["url"])
 
