@@ -1,15 +1,18 @@
+
+from google.cloud import storage
 import sqlalchemy
 from flask import jsonify
 from sqlalchemy import create_engine, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 import json
+import datetime
+import os
 
 '''
 Called by HTTP request,
 input JSON: Contains userid and information about video uploaded
-    {
-        "userid": 7,
+    {   "userid": 7,
         "video": {
             "title" : 'cat',
             "url": 1,
@@ -39,6 +42,9 @@ def upload(request):
                              "error": "Request is not acceptable, user information can not be empty"},
              "unprocessable": {"status": "fail", "status_code": 422, "error": "JSON format is not correct"},
              "internal": {"status": "fail", "status_code": 500, "error": "Unexpected error in our database/server"}}
+
+    if request.method != "POST":
+        return jsonify(error["bad method"]), error["bad method"]["status_code"]
 
     if request.method != "POST":
         return jsonify(error["bad method"]), error["bad method"]["status_code"]
@@ -153,5 +159,31 @@ def upload(request):
 
     for video in videos_in_db:
         print(video)
+
+    """Uploads a file to the bucket."""
+    bucket_name = "video_360"
+
+    # storage_client = storage.Client()
+    storage_client = storage.Client.from_service_account_json(
+        'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.get_blob(request_json["video"]["url"])
+    print(blob)
+
+    import urllib.request as req
+    import cv2
+
+    url = blob.generate_signed_url(datetime.timedelta(seconds=300), method='GET')
+    req.urlretrieve(url, request_json["video"]["url"])
+    cap = cv2.VideoCapture(request_json["video"]["url"])
+    if cap.isOpened():
+        ret, frame = cap.read()
+        bucket = storage_client.bucket("videos_thumbnail")
+        blob = bucket.blob(request_json["video"]["url"])
+
+        cv2.imwrite(request_json["video"]["url"], frame)
+        cv2.waitKey(0)
+        blob.upload_from_filename(request_json["video"]["url"])
+        os.remove(request_json["video"]["url"])
 
     return "success"
