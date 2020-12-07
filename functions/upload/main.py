@@ -161,29 +161,31 @@ def upload(request):
         print(video)
 
     """Uploads a file to the bucket."""
-    bucket_name = "video_360"
+    bucket_name = "videos_360"
+    thumbnail_bucket_name = "videos_thumbnail"
+    destination_blob_name = request_json["video"]["url"]
 
     # storage_client = storage.Client()
     storage_client = storage.Client.from_service_account_json(
         'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
     bucket = storage_client.bucket(bucket_name)
-    blob = bucket.get_blob(request_json["video"]["url"])
+    blob = bucket.get_blob(destination_blob_name)
     print(blob)
 
     import urllib.request as req
     import cv2
 
     url = blob.generate_signed_url(datetime.timedelta(seconds=300), method='GET')
-    req.urlretrieve(url, request_json["video"]["url"])
-    cap = cv2.VideoCapture(request_json["video"]["url"])
+    req.urlretrieve(url, destination_blob_name)
+    cap = cv2.VideoCapture(destination_blob_name)
     if cap.isOpened():
         ret, frame = cap.read()
-        bucket = storage_client.bucket("videos_thumbnail")
-        blob = bucket.blob(request_json["video"]["url"])
-
-        cv2.imwrite(request_json["video"]["url"], frame)
+        image_name = destination_blob_name.split('.')[0] + '.jpeg'
+        thumbnail_bucket = storage_client.bucket(thumbnail_bucket_name)
+        thumbnail_blob = thumbnail_bucket.blob(image_name)
+        cv2.imwrite(image_name, frame)
         cv2.waitKey(0)
-        blob.upload_from_filename(request_json["video"]["url"])
-        os.remove(request_json["video"]["url"])
+        thumbnail_blob.upload_from_filename(image_name)
+        os.remove(image_name)
 
     return "success"

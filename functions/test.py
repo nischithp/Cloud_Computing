@@ -18,7 +18,7 @@ params = {
                 "userid": 7,
                 "video": {
                     "title" : 'cat',
-                    "url": "Naveen - Rating Predictor.mp4",
+                    "url": "Naveen - Rating Predictor (1).mp4",
                     "tag": "abcd",
                     "description": "asdasdas",
                     "privecy": "00000000000012"
