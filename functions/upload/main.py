@@ -112,7 +112,7 @@ def upload(request):
     try:
         user_in_db = db.execute(check_user_query, {"id": request_json["userid"]}).fetchall()
 
-    except SQLAlchemyError as e:cd
+    except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
         return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
