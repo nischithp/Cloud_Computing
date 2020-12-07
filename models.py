@@ -24,3 +24,7 @@ class EditProfileForm(Form):
   newPassword = PasswordField('New Password', [validators.InputRequired()])
   confirm = PasswordField('Repeat Password',  [validators.DataRequired(),validators.EqualTo('newPassword', message='Passwords must match')])
   submit = SubmitField('Change Password')
+
+class SearchForm(Form):
+  searchBar = StringField('Search')
+  submit = SubmitField("Search")

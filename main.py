@@ -2,7 +2,7 @@ import hashlib
 from hashlib import new
 import json
 import os
-from datetime import datetime, time
+from datetime import date, datetime, time
 from flask.helpers import flash
 
 import requests
@@ -15,7 +15,7 @@ from google.cloud import storage
 from moviepy.editor import VideoFileClip
 
 
-from models import EditProfileForm, LoginForm, RegForm
+from models import EditProfileForm, LoginForm, RegForm, SearchForm
 
 app = Flask(__name__)
 app.config.from_mapping(SECRET_KEY=b'\xd6\x04\xbdj\xfe\xed$c\x1e@\xad\x0f\x13,@G')
@@ -30,18 +30,31 @@ userDataCloudURL = 'https://us-central1-cloudcomputinglab-291822.cloudfunctions.
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    # linking storage
-    storage_client = storage.Client.from_service_account_json(
-                    'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
-    bucket_name = "videos_360"
-    videoNames = storage_client.list_blobs(bucket_name)
+    form = SearchForm(request.form)
+    if request.method == "POST":
+        searchString = form.searchBar.data
+        params = {"data": {"searchString": searchString
+                            },
+              "request": "search"}
+        # res = requests.post(userDataCloudURL, json=params)
 
-    bucket_name="videos_thumbnail"
-    thumbnails = storage_client.list_blobs(bucket_name)
+    params = {"data": {"searchString": ""
+                            },
+              "request": "search"}
+    # res = requests.post(userDataCloudURL, json=params)
+
+    # linking storage
+    # storage_client = storage.Client.from_service_account_json(
+    #                 'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
+    # bucket_name = "videos_360"
+    # videoNames = storage_client.list_blobs(bucket_name)
+
+    # bucket_name="videos_thumbnail"
+    # thumbnails = storage_client.list_blobs(bucket_name)
 
     # for blob in blobs:
     #     print(blob.name)    
-    return render_template(indexURL, videoNames=videoNames, thumbnails=thumbnails)
+    return render_template(indexURL, form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -180,6 +193,15 @@ def upload():
     if request.method == 'POST':
         file = request.files['file']
         size = request.content_length
+        tags, description = ""
+        privacy = 0
+        tags = request.form.getlist("tags")
+        description = request.form.getlist("description")
+        privacy = request.form.getlist("privacy")
+        if str(privacy).lower == "public":
+            privacy = 0
+        else:
+            privacy = 1
 
         if not file:
             print("No File to Upload.")
@@ -196,8 +218,8 @@ def upload():
         else:
             try:
                 bucket_name = "videos_360"
-                timestr = time.strftime("%Y%m%d-%H%M%S")
-                destination_blob_name = str(session['id'])+ '-' + datetime.now().strftime("%Y%m%d%H%M%S") + '.' + file.filename.split('.')[-1]
+                date_time_string = datetime.now().strftime("%Y%m%d%H%M%S")
+                destination_blob_name = str(session['id'])+ '-' + date_time_string + '.' + file.filename.split('.')[-1]
                 print(destination_blob_name)
 
                 # linking storage
@@ -223,10 +245,10 @@ def upload():
                 "userid": session['id'],
                 "video": {
                     "title" : file.filename,
-                    "url": destination_blob_name
-                    # "tag": "abcd",
-                    # "description": "asdasdas",
-                    # "privacy": "00000000000012"
+                    "url": destination_blob_name,
+                    "tag": tags,
+                    "description": description,
+                    "privacy": privacy
                         }
                 }
                 # res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=dictToSend)

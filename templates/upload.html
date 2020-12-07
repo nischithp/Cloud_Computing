@@ -48,7 +48,14 @@
             <form id="upload-file" method="post" enctype="multipart/form-data">
                 <p>
                     <label for="file">Select a file from your Local System</label>
-                    <input name="file"  type="file">
+                    <input name="file"  type="file"/><br>
+                    Tags: <input name="tags" style="width: 250px;" type="text" placeholder="Enter tags seperated by commas"/><br><br>
+                    Description: <textarea name="description" style="width: 250px; height: 30px;" type="text" placeholder="Enter a brief description of the video"></textarea><br>
+                    <br>Select a video option for your privacy:<br>
+                    <input name="privacy" type="radio" value="public"/>
+                    <label for="public">Public</label><br>
+                    <input name="privacy" type="radio" value="private"/>
+                    <label for="private">Private</label><br>
                 </p>
                 <p>
                     <button id="upload-file-btn" class="btn btn-dark btn-lg" type="button">Upload</button>

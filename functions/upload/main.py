@@ -180,6 +180,7 @@ def upload(request):
     url = blob.generate_signed_url(datetime.timedelta(seconds=300), method='GET')
     req.urlretrieve(url, destination_blob_name)
     cap = cv2.VideoCapture(destination_blob_name)
+    
     if cap.isOpened():
         ret, frame = cap.read()
         image_name = destination_blob_name.split('.')[0] + '.jpeg'
@@ -189,5 +190,7 @@ def upload(request):
         cv2.waitKey(0)
         thumbnail_blob.upload_from_filename(image_name)
         os.remove(image_name)
+        cap.release()
+        os.remove(destination_blob_name)
 
     return "success"
