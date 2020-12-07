@@ -93,12 +93,12 @@ def search(request):
             search_words_title += " OR title LIKE '%" + word + "%'"
             search_words_tags += " OR tags LIKE '%" + word + "%'"
             Search_words_description += " OR description LIKE '%" + word + "%'"
-        get_videos_query = sqlalchemy.text("SELECT url FROM videos where (" + search_words_title +
+        get_videos_query = sqlalchemy.text("SELECT title, url FROM videos where (" + search_words_title +
                                            " OR " + search_words_tags +
                                            " OR " + Search_words_description +
                                            ") and privacy = 0")
     else:
-        get_videos_query = sqlalchemy.text("SELECT url FROM videos where privacy = 0")
+        get_videos_query = sqlalchemy.text("SELECT title, url FROM videos where privacy = 0")
 
     try:
         videos_in_db = db.execute(get_videos_query).fetchall()
@@ -109,6 +109,6 @@ def search(request):
 
     data = {"videos": []}
     for video in videos_in_db:
-        data["videos"].append(video.url)
+        data["videos"].append({"title": video.title, "url": video.url})
     return jsonify(data)
 
