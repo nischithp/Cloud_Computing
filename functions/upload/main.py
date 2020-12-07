@@ -22,7 +22,7 @@ Enters user video details in SQL database and creates video thumbnail.
 '''
 
 def upload(request):
-
+    print(request)
     error = {"bad request": {"status": "fail", "status_code": 400,
                              "error": "No JSON, request should include JSON object"},
              "unauthorised": {"status": "fail", "status_code": 401,
