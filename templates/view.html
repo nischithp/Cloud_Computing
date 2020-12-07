@@ -47,6 +47,7 @@
             <h1>Open Source API and Microservice based Video Sharing Platform</h1>
             <p>By Nischith Javagal Panish and Naveen Sokke Nagarajappa</p>
             
+            {% print(videoData["videoQuality"]) %}
             <!-- Video Player -->
             <div class="video-player">
                 <video-js controls data-setup="{}">
@@ -54,6 +55,7 @@
                         src="https://storage.cloud.google.com/videos_{{ videoData['videoQuality']}}/{{ videoData['videoName']}}">
                 </video-js>
             </div>
+
         </div>
 
         <script>

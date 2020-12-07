@@ -27,34 +27,31 @@ registerURL = "register.html"
 loginURL = "login.html"
 editprofileURL = "editprofile.html"
 userDataCloudURL = 'https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access'
+searchCloudURL = 'https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/search'
+uploadCloudURL = 'https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/upload'
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
     form = SearchForm(request.form)
+    searchString = ""
+    params = {"search": searchString}
+    res = requests.post(searchCloudURL, json=params)
+    videos = {}
+    videos =  json.loads(res.text)["videos"]
+    # print(videos)
     if request.method == "POST":
+        searchString = ""
         searchString = form.searchBar.data
-        params = {"data": {"searchString": searchString
-                            },
-              "request": "search"}
-        # res = requests.post(userDataCloudURL, json=params)
-
-    params = {"data": {"searchString": ""
-                            },
-              "request": "search"}
-    # res = requests.post(userDataCloudURL, json=params)
-
-    # linking storage
-    # storage_client = storage.Client.from_service_account_json(
-    #                 'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
-    # bucket_name = "videos_360"
-    # videoNames = storage_client.list_blobs(bucket_name)
-
-    # bucket_name="videos_thumbnail"
-    # thumbnails = storage_client.list_blobs(bucket_name)
-
-    # for blob in blobs:
-    #     print(blob.name)    
-    return render_template(indexURL, form=form)
+        params = {"search": searchString}
+        res = requests.post(searchCloudURL, json=params)
+        videos = {}
+        videos =  json.loads(res.text)["videos"]
+        if videos == []:
+            flash("No videos found matching those keywords")
+        print(videos)
+        form = SearchForm(request.form)
+        return render_template(indexURL, form=form, videos=videos, ) 
+    return render_template(indexURL, form=form, videos=videos)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -72,7 +69,6 @@ def login():
         res = requests.post(userDataCloudURL, json=params)
         data = {}
         print(res.text)
-        # data = json.loads(res.text)
         status = res.status_code
         if(status==200):
             data = json.loads(res.text)
@@ -193,12 +189,14 @@ def upload():
     if request.method == 'POST':
         file = request.files['file']
         size = request.content_length
-        tags, description = ""
+        tags = "" 
+        description = ""
         privacy = 0
         tags = request.form.getlist("tags")
         description = request.form.getlist("description")
         privacy = request.form.getlist("privacy")
-        if str(privacy).lower == "public":
+        print(privacy)
+        if privacy[0] == "public":
             privacy = 0
         else:
             privacy = 1
@@ -223,8 +221,10 @@ def upload():
                 print(destination_blob_name)
 
                 # linking storage
-                storage_client = storage.Client.from_service_account_json(
-                    'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
+                storage_client = storage.Client()
+                
+                # storage_client = storage.Client.from_service_account_json(
+                #     'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
                 # storage_client = storage.Client.from_service_account_json(
                 #     'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
 
@@ -246,13 +246,14 @@ def upload():
                 "video": {
                     "title" : file.filename,
                     "url": destination_blob_name,
-                    "tag": tags,
+                    "tags": tags,
                     "description": description,
                     "privacy": privacy
                         }
                 }
-                # res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=dictToSend)
-                res = requests.post('http://127.0.0.1:8080/', json=params)
+                print("PArams",params)
+                res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/upload', json=dictToSend)
+                # res = requests.post('http://127.0.0.1:8080/', json=params)
                 if res.status_code == 200:
                     status = "Uploaded"             
                     # flash(status)
@@ -273,5 +274,5 @@ def view(videoName):
     return ("this page can only be reached with a GET request. Please click on a thumbnail on the home page")
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', '5000'))
+    port = int(os.getenv('PORT', '8080'))
     app.run(debug=False, host='0.0.0.0', port=port)
