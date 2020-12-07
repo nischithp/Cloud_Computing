@@ -2,11 +2,10 @@ import hashlib
 from hashlib import new
 import json
 import os
-from datetime import time
+from datetime import date, datetime, time
 from flask.helpers import flash
 
 import requests
-<<<<<<< HEAD
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from requests.api import post
 # from requests.sessions import session
@@ -14,15 +13,9 @@ from flask_bootstrap import Bootstrap
 from PIL import Image
 from google.cloud import storage
 from moviepy.editor import VideoFileClip
-=======
-from flask import Flask, render_template, request, session
-from requests.api import post
-# from requests.sessions import session
-from flask_bootstrap import Bootstrap
->>>>>>> 397d3bcc6027ad33e1fd18b0a9d65c53ab881242
 
 
-from models import EditProfileForm, LoginForm, RegForm
+from models import EditProfileForm, LoginForm, RegForm, SearchForm
 
 app = Flask(__name__)
 app.config.from_mapping(SECRET_KEY=b'\xd6\x04\xbdj\xfe\xed$c\x1e@\xad\x0f\x13,@G')
@@ -37,7 +30,32 @@ userDataCloudURL = 'https://us-central1-cloudcomputinglab-291822.cloudfunctions.
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template(indexURL)
+    form = SearchForm(request.form)
+    if request.method == "POST":
+        searchString = form.searchBar.data
+        params = {"data": {"searchString": searchString
+                            },
+              "request": "search"}
+        # res = requests.post(userDataCloudURL, json=params)
+
+    params = {"data": {"searchString": ""
+                            },
+              "request": "search"}
+    # res = requests.post(userDataCloudURL, json=params)
+
+    # linking storage
+    # storage_client = storage.Client.from_service_account_json(
+    #                 'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
+    # bucket_name = "videos_360"
+    # videoNames = storage_client.list_blobs(bucket_name)
+
+    # bucket_name="videos_thumbnail"
+    # thumbnails = storage_client.list_blobs(bucket_name)
+
+    # for blob in blobs:
+    #     print(blob.name)    
+    return render_template(indexURL, form=form)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -60,7 +78,7 @@ def login():
             data = json.loads(res.text)
             putDataIntoSession(data)
             session["loggedin"] = True
-            return render_template(indexURL)
+            return redirect("/")
         elif(status==401 or status==404):
             flash("Invalid credentials","error")
             form = LoginForm(request.form)
@@ -101,11 +119,14 @@ def registration():
         data = {}
         data = json.loads(res.text)
         status = res.status_code
-        if( status == 200):
-            return render_template(loginURL)
+        print(res)
+        if status == 201:
+            flash("Succesful registration. Please proceed to login")
+            # form = LoginForm(request.form)
+            return redirect("/login")
         elif status == 403:
             flash("Email already in use. Please use another email")
-        elif(status==500):
+        elif status == 500:
             return ("500 error. Please contact your server administrator.")
     return render_template(registerURL, form=form)
 
@@ -135,19 +156,20 @@ def editprofile():
             if res.status_code == 200:
                 # Success
                 print(data)
-                data = json.loads(res.text)
+                flash("Password updated")
+                data = res.text
             elif res.status_code == 500:
                 # INternl Server Error
-                data = json.loads(res.text)
+                data = res.text
             elif res.status_code == 422:
                 # Missing or Invalid Data
-                data = json.loads(res.text)
+                data = res.text
             elif res.status_code == 401:
                 # old and new passwords do not match
-                data = json.loads(res.text)
+                data = res.text
             elif res.status_code == 404:
                 # You can only login, register or editProfile
-                data = json.loads(res.text)
+                data = res.text
             print("Response:"+res.text)
             # data = json.loads(res.text)
             status = res.status_code
@@ -171,39 +193,34 @@ def upload():
     if request.method == 'POST':
         file = request.files['file']
         size = request.content_length
+        tags, description = ""
+        privacy = 0
+        tags = request.form.getlist("tags")
+        description = request.form.getlist("description")
+        privacy = request.form.getlist("privacy")
+        if str(privacy).lower == "public":
+            privacy = 0
+        else:
+            privacy = 1
 
         if not file:
             print("No File to Upload.")
             status="No File to Upload."
 
         elif size > ALLOWED_SIZE:
-            print ("File size more then 10Mb.")
-            status="File size more then 10Mb."
+            print ("File size more then 10GB.")
+            status="File size more then 10GB."
 
-        elif '.' in file.filename and file.filename.split('.', 1)[1] not in ALLOWED_EXTENSIONS:
+        elif '.' in file.filename and file.filename.split('.')[-1] not in ALLOWED_EXTENSIONS:
             print("This file extesion not allowed.")
             status="This file extesion not allowed."
 
         else:
             try:
-                thumbnail_bucket_name = "videos_thumbnail"
                 bucket_name = "videos_360"
-                # source_file_name = "local/path/to/file"
-                print(file.filename)
-
-                destination_blob_name = file.filename
-
-                # Creating thumbnail file:
-
-                print(file.stream)
-
-
-                # vs = file.stream
-                # image_name = destination_blob_name.split('.')[0] + '.jpeg'
-                # frame = vs.get_frame_at_sec(10)
-                # img = frame.image()
-                # img = img.resize((300, 300))
-                # img.save('{0}.jpeg'.format(image_name))
+                date_time_string = datetime.now().strftime("%Y%m%d%H%M%S")
+                destination_blob_name = str(session['id'])+ '-' + date_time_string + '.' + file.filename.split('.')[-1]
+                print(destination_blob_name)
 
                 # linking storage
                 storage_client = storage.Client.from_service_account_json(
@@ -211,17 +228,12 @@ def upload():
                 # storage_client = storage.Client.from_service_account_json(
                 #     'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
 
-                # Uploading thumbnail
-                # Setting destination name
-                thumbnail_bucket = storage_client.bucket(thumbnail_bucket_name)
-                # thumbnail_blob = thumbnail_bucket.blob(image_name)
-
-                # thumbnail_blob.upload_from_file(img)
-
                 # uploading video file
                 bucket = storage_client.bucket(bucket_name)
                 blob = bucket.blob(destination_blob_name)
 
+                metadata = {'title': file.filename, 'name': destination_blob_name }
+                blob.metadata = metadata
                 blob.upload_from_file(file)
 
                 print(
@@ -229,21 +241,37 @@ def upload():
                         file.filename, destination_blob_name
                     )
                 )
-
-                filename = file.filename,
-                status = "Uploaded"
+                params = {
+                "userid": session['id'],
+                "video": {
+                    "title" : file.filename,
+                    "url": destination_blob_name,
+                    "tag": tags,
+                    "description": description,
+                    "privacy": privacy
+                        }
+                }
+                # res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=dictToSend)
+                res = requests.post('http://127.0.0.1:8080/', json=params)
+                if res.status_code == 200:
+                    status = "Uploaded"             
+                    # flash(status)
 
             except Exception as e:
                 print(e)
-                status="Failed to upload. Some error occured."
-
-        return render_template('upload.html', message=status)
+                status="Failed to upload. An error occured."
+                # flash(status)
+        return render_template('upload.html')
     return render_template('upload.html')
 
-@app.route('/view/', methods=['GET', 'POST'])
-def view():
-    return render_template('view.html')
+@app.route('/view/<videoName>', methods=['GET', 'POST'])
+def view(videoName):
+    if request.method == 'GET':
+        videoData = {"videoQuality" : 360,
+                 "videoName": videoName}
+        return render_template('view.html', videoData=videoData)
+    return ("this page can only be reached with a GET request. Please click on a thumbnail on the home page")
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', '8080'))
+    port = int(os.getenv('PORT', '5000'))
     app.run(debug=False, host='0.0.0.0', port=port)

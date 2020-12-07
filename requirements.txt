@@ -19,10 +19,11 @@ webassets
 Werkzeug
 WTForms
 Flask-Session
-<<<<<<< HEAD
 
 flask_bootstrap
 # New requirements for Upload and View 
+google-cloud-storage
+moviepy
 
 PyMySQL~=0.10.1
 
@@ -51,7 +52,3 @@ attrs~=20.2.0
 cloudevents~=0.3.0
 six~=1.15.0
 requests~=2.24.0
-=======
-requests
-flask_bootstrap
->>>>>>> 397d3bcc6027ad33e1fd18b0a9d65c53ab881242
