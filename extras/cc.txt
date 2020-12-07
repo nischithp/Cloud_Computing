@@ -6,3 +6,33 @@ gcloud builds submit --tag gcr.io/cloudcomputinglab-291822/cloud-computing-front
     # print("request.method: ", request.method)
     # print("request.method: ", request.method)
     # print("request.headers: ", request.headers)
+
+    #
+    # tables = db.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")
+    # return jsonify([{key: value for key, value in row.items()} for row in tables if row is not None]), 200
+
+#     user = {"username": "Naveen",
+#             "email": "naveensn100@gmail.com",
+#             "firstname": "Naveen",
+#             "lastname": "Navn",
+#             "password": "asodasnasidndai"
+#             }
+#     #
+#
+#     # db.execute("INSERT INTO users (id, username, email, firstname, lastname, password) ",
+#     #            "VALUES (, 'naveen', 'naveensn100@gmail.com', 'Naveen', 'S Na', 'asdasaxasdxasda')")
+#     # db.commit()
+#
+#     db.execute("INSERT INTO users (username, email, firstname, lastname, password) "
+#                "VALUES (:username, :email, :firstname, :lastname, :password)",
+#                user)
+#     db.commit()
+#
+#     stmt = sqlalchemy.text("SELECT * from users")
+#     users = db.execute(stmt).fetchall()
+#     if users is not None:
+#         return jsonify([{key: value for key, value in row.items()} for row in users if row is not None]), 200
+#     else:
+#         return jsonify([{}])
+#
+#     # return jsonify({'greeting': 'Hello {}!'.format(escape(name + method))})

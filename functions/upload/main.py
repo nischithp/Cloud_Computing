@@ -71,54 +71,50 @@ def upload(request):
         return jsonify(error["empty field"]), error["empty field"]["status_code"]
 
     # --------------Local testing connection string starts here---------------
-    mysql = {"database": "video_sharing",
-             "host": "35.232.179.75",
-             "port": "127.0.0.1:3306",
-             "connection": "cloudcomputinglab-291822:us-central1:cloud-computing",
-             "username": "cloud-computing",
-             "password": "cloud-computing",
-             "drivername": "mysql+pymysql",
-             "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
-             }
-
-    eng = create_engine(mysql["url"])
+    # mysql = {"database": "video_sharing",
+    #          "host": "35.232.179.75",
+    #          "port": "127.0.0.1:3306",
+    #          "connection": "cloudcomputinglab-291822:us-central1:cloud-computing",
+    #          "username": "cloud-computing",
+    #          "password": "cloud-computing",
+    #          "drivername": "mysql+pymysql",
+    #          "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
+    #          }
+    #
+    # eng = create_engine(mysql["url"])
 
     # --------------Local testing connection string ends here------------------
 
     # ---------------------Cloud connection String starts here-----------
 
-    # connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
-    # query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
+    connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
+    query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
 
-    # eng = create_engine(
-    #     engine.url.URL(
-    #         drivername="mysql+pymysql",
-    #         username="cloud-computing",
-    #         password="cloud-computing",
-    #         database="video_sharing",
-    #         query=query_string,
-    #     ),
-    #     pool_size=5,
-    #     max_overflow=2,
-    #     pool_timeout=30,
-    #     pool_recycle=1800
-    # )
+    eng = create_engine(
+        engine.url.URL(
+            drivername="mysql+pymysql",
+            username="cloud-computing",
+            password="cloud-computing",
+            database="video_sharing",
+            query=query_string,
+        ),
+        pool_size=5,
+        max_overflow=2,
+        pool_timeout=30,
+        pool_recycle=1800
+    )
     # ------------------ Cloud connection string ends here------------------------
 
     db = scoped_session(sessionmaker(bind=eng))
 
-    get_user_query = sqlalchemy.text("SELECT id, username, firstname, lastname, email, date_time"
-                                     " FROM users")
+    check_user_query = sqlalchemy.text("SELECT 1 FROM users WHERE id = :id")
 
     try:
-        user_in_db = db.execute(get_user_query).fetchall()
+        user_in_db = db.execute(check_user_query, {"id": request_json["userid"]}).fetchall()
 
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
         return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
-
-    for user in user_in_db:
-        print(user.id)
 
     if not user_in_db:
         return jsonify(error["forbidden"]), error["forbidden"]["status_code"]
@@ -151,26 +147,26 @@ def upload(request):
     bucket_name = "videos_360"
     thumbnail_bucket_name = "videos_thumbnail"
     destination_blob_name = request_json["video"]["url"]
+    print(destination_blob_name)
 
     # storage_client = storage.Client()
-    storage_client = storage.Client.from_service_account_json(
-        'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
+    storage_client = storage.Client.from_service_account_json('cloudcomputinglab-291822-d8e65d7158be.json')
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.get_blob(destination_blob_name)
+    blob.download_to_filename("/tmp/" + destination_blob_name)
 
-    url = blob.generate_signed_url(datetime.timedelta(seconds=300), method='GET')
-    req.urlretrieve(url, destination_blob_name)
-    cap = cv2.VideoCapture(destination_blob_name)
+    cap = cv2.VideoCapture("/tmp/" + destination_blob_name)
+    # print(url)
     if cap.isOpened():
         ret, frame = cap.read()
         image_name = destination_blob_name.split('.')[0] + '.jpeg'
         thumbnail_bucket = storage_client.bucket(thumbnail_bucket_name)
         thumbnail_blob = thumbnail_bucket.blob(image_name)
-        cv2.imwrite(image_name, frame)
+        cv2.imwrite("/tmp/" + image_name, frame)
         cv2.waitKey(0)
-        thumbnail_blob.upload_from_filename(image_name)
-        os.remove(image_name)
+        thumbnail_blob.upload_from_filename("/tmp/" + image_name)
         cap.release()
-        os.remove(destination_blob_name)
+    else:
+        return jsonify(error["internal"]), error["internal"]["status_code"]
 
-    return "success"
+    return jsonify({"status": "success", "status_code": 201}), 201

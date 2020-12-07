@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "cloudcomputinglab-291822",
+  "private_key_id": "745a59e0bb6e8ac868f4f8da1d901ec224869cb7",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDciof6mJUdgaXO\nVauvlOdpt0uMbno3xcLRT/67FT+u0JUcbRIt/Q9UK/jh6ZeKqB+S5roxp+q3Zpa5\njTmF3KocPWuV3CxT0xTbuVLwsJKsOA2jCiK4x2/mk2/CIrnsU9CkNhRdIW5XQL13\nPxhO8iLtZPAGD31f13Wx2qFcpUoaFATKsCmVmmG2e4XzhzEsnAlO/ybScL1N0ZE6\nnYe0jqhoflb7YEl5oVeuGYfkmz3BKY8rYkrMFQE7pFwUtt+0NLHld1c1KPs0yZnD\nhFBLcpzuS+ygAIoXza45QhrCF9OTApxxr+cLjMWpoqt9mrBNjkisBf5nQVM7Wl01\nHDqisAGfAgMBAAECggEAS69zCQoyKmUi3NPDzscAP+R6leAYK2m/+QtF9ThOmZTV\nh2LbGVM+XnmUuRrsOdaGt2hdP8tLntMjKNyRgCIBcx2U/WIJCF9pShqonxdJzraR\n34EL93PiMDQq52n5emQtNx2kEW32qxT5sKHDmtw4JlY8lSfds/WCW54XQG8tJhNT\neTtBP6HZHQRgjNaLjNFlHH1KENAJNIjT0pPD4q7q1CkbpSWOHj2OMvczYNoSkHVJ\nmPRJ+TATcJHmtV0G8LO822JxWEqU3EKzlRD9gsiAm/62yck5+NUYjMidaOfysaps\ntpHSgDtA3KuILG75ilosHpL+046xSOdhYdPlDfRpUQKBgQD2v+EZvasQzAloKkay\nL2ZkUM9hq+eG431ZParE5PEd75stt9eAvLt+YPh08juMiqNiq+vl/kkaDBgeWVEe\nEner0QTIp3NiAdGHRlpucEMPLGdNLyxxdrFI890jqPMrUixVwaBdnHR56G0JZngn\nBlUp8o1dTNxT6RkEHPhAebXUhwKBgQDkzx975bHpSufKtD0zv21IOm3AgWCQ6OZu\nm3abz14ConTStayOR9KqI2t3CtogkljZR2fh0m21ByASWdewpwYAOlvOgKSuvHvk\njW8Ot28HTbuRuCZnk5aDI8H6vBDYXAFam1yMhJlTMDGyWEBkc+EYV4Zi0Az08fnX\nSa9Ghp1IKQKBgDLoOXfHEtD/V31/I2DFuLk/ltmOztCchJLxzxaaKUjE014mTLbJ\nuWEEfp4aD8EaJUVJNP0ZblmKXzt7r+mlY701/WesbHiu6VygXi3kyWELBzD8Z43t\nL/xeG6SsyaaJaI40yXImwj0Yf85trqJWgyGJYjL6lYZWVAvuMiWTNrlnAoGBALdd\nygR3wsmMjw/iu/2BlqnAsX4J8QKQs0LG8hnR6KxB10+Z6qynoItbEV94YfCid/PB\nBt5xzhu6lxg9yd43LFb4beSjMdcbFErIkc0AckkvIXeZVaXCIGf+OxGer/1EVo1v\nXo76IQoK4Hjlwsz+FNF2Kyt7Qjb2yNugoIfrj5ZpAoGARkcYClucwgt0WdWVhWMO\nfBQwaAKKkvb1FNcp4goGkaGk6AIcGBjfpfjVBTBkV+HIblCSUGy7VkbKnRw5wy7T\n7jo3gfuGcIXwz6ixjVphjD0lcmikfQo5MXn76aMLE0Os6tGHLqdSzXtd28zZwlbM\nhb92kHzhSAzfAuAn+pOGH2c=\n-----END PRIVATE KEY-----\n",
+  "client_email": "video-share@cloudcomputinglab-291822.iam.gserviceaccount.com",
+  "client_id": "117033901519678425725",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/video-share%40cloudcomputinglab-291822.iam.gserviceaccount.com"
+}

@@ -137,8 +137,9 @@ def upload():
                 # img.save('{0}.jpeg'.format(image_name))
 
                 # linking storage
-                storage_client = storage.Client.from_service_account_json(
-                    'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
+                storage_client = storage.Client()
+                # storage_client = storage.Client.from_service_account_json(
+                #     'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
 
                 # Uploading thumbnail
                 # Setting destination name

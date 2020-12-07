@@ -101,7 +101,6 @@ def search(request):
         get_videos_query = sqlalchemy.text("SELECT url FROM videos where privacy = 0")
 
     try:
-        print(get_videos_query)
         videos_in_db = db.execute(get_videos_query).fetchall()
 
     except SQLAlchemyError as e:
@@ -110,7 +109,6 @@ def search(request):
 
     data = {"videos": []}
     for video in videos_in_db:
-        print(video.url)
         data["videos"].append(video.url)
     return jsonify(data)
 
