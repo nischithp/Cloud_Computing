@@ -189,7 +189,7 @@ def upload():
             print ("File size more then 10GB.")
             status="File size more then 10GB."
 
-        elif '.' in file.filename and file.filename.split('.', 1)[-1] not in ALLOWED_EXTENSIONS:
+        elif '.' in file.filename and file.filename.split('.')[-1] not in ALLOWED_EXTENSIONS:
             print("This file extesion not allowed.")
             status="This file extesion not allowed."
 
@@ -197,7 +197,7 @@ def upload():
             try:
                 bucket_name = "videos_360"
 
-                destination_blob_name = str(session['id'])+ '-' + str(datetime.now())
+                destination_blob_name = str(session['id'])+ '-' + str(datetime.now()) + '.' + file.filename.split('.')[-1]
                 print(destination_blob_name)
 
                 # linking storage
@@ -233,11 +233,12 @@ def upload():
                 res = requests.post('http://127.0.0.1:8080/', json=params)
                 if res.status_code == 200:
                     status = "Uploaded"             
+                    # flash(status)
 
             except Exception as e:
                 print(e)
                 status="Failed to upload. An error occured."
-            flash(status)
+                # flash(status)
         return render_template('upload.html')
     return render_template('upload.html')
 

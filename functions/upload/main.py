@@ -161,12 +161,16 @@ def upload(request):
         print(video)
 
     """Uploads a file to the bucket."""
-    bucket_name = "video_360"
+    bucket_name = "videos_360"
 
     # storage_client = storage.Client()
+    # storage_client = storage.Client.from_service_account_json(
+    #     'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
     storage_client = storage.Client.from_service_account_json(
-        'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
+        'C:/Users/nisch/Downloads/cloudcomputinglab-291822-bf0774247e88.json')
     bucket = storage_client.bucket(bucket_name)
+    destination_blob_name = request_json["video"]["url"]
+    print(destination_blob_name)
     blob = bucket.get_blob(request_json["video"]["url"])
     print(blob)
 
