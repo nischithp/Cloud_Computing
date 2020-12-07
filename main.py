@@ -2,7 +2,7 @@ import hashlib
 from hashlib import new
 import json
 import os
-from datetime import time
+from datetime import datetime, time
 from flask.helpers import flash
 
 import requests
@@ -65,7 +65,7 @@ def login():
             data = json.loads(res.text)
             putDataIntoSession(data)
             session["loggedin"] = True
-            return render_template(indexURL)
+            return redirect("/")
         elif(status==401 or status==404):
             flash("Invalid credentials","error")
             form = LoginForm(request.form)
@@ -106,9 +106,11 @@ def registration():
         data = {}
         data = json.loads(res.text)
         status = res.status_code
-        if status == 200:
+        print(res)
+        if status == 201:
             flash("Succesful registration. Please proceed to login")
-            return render_template(loginURL)
+            # form = LoginForm(request.form)
+            return redirect("/login")
         elif status == 403:
             flash("Email already in use. Please use another email")
         elif status == 500:
@@ -141,19 +143,20 @@ def editprofile():
             if res.status_code == 200:
                 # Success
                 print(data)
-                data = json.loads(res.text)
+                flash("Password updated")
+                data = res.text
             elif res.status_code == 500:
                 # INternl Server Error
-                data = json.loads(res.text)
+                data = res.text
             elif res.status_code == 422:
                 # Missing or Invalid Data
-                data = json.loads(res.text)
+                data = res.text
             elif res.status_code == 401:
                 # old and new passwords do not match
-                data = json.loads(res.text)
+                data = res.text
             elif res.status_code == 404:
                 # You can only login, register or editProfile
-                data = json.loads(res.text)
+                data = res.text
             print("Response:"+res.text)
             # data = json.loads(res.text)
             status = res.status_code
@@ -183,33 +186,19 @@ def upload():
             status="No File to Upload."
 
         elif size > ALLOWED_SIZE:
-            print ("File size more then 10Mb.")
-            status="File size more then 10Mb."
+            print ("File size more then 10GB.")
+            status="File size more then 10GB."
 
-        elif '.' in file.filename and file.filename.split('.', 1)[1] not in ALLOWED_EXTENSIONS:
+        elif '.' in file.filename and file.filename.split('.', 1)[-1] not in ALLOWED_EXTENSIONS:
             print("This file extesion not allowed.")
             status="This file extesion not allowed."
 
         else:
             try:
-                thumbnail_bucket_name = "videos_thumbnail"
                 bucket_name = "videos_360"
-                # source_file_name = "local/path/to/file"
-                print(file.filename)
 
-                destination_blob_name = file.filename
-
-                # Creating thumbnail file:
-
-                print(file.stream)
-
-
-                # vs = file.stream
-                # image_name = destination_blob_name.split('.')[0] + '.jpeg'
-                # frame = vs.get_frame_at_sec(10)
-                # img = frame.image()
-                # img = img.resize((300, 300))
-                # img.save('{0}.jpeg'.format(image_name))
+                destination_blob_name = str(session['id'])+ '-' + str(datetime.now())
+                print(destination_blob_name)
 
                 # linking storage
                 storage_client = storage.Client.from_service_account_json(
@@ -217,17 +206,12 @@ def upload():
                 # storage_client = storage.Client.from_service_account_json(
                 #     'C:/Users/Naveen S N/Downloads/CloudComputingLab-745a59e0bb6e.json')
 
-                # Uploading thumbnail
-                # Setting destination name
-                thumbnail_bucket = storage_client.bucket(thumbnail_bucket_name)
-                # thumbnail_blob = thumbnail_bucket.blob(image_name)
-
-                # thumbnail_blob.upload_from_file(img)
-
                 # uploading video file
                 bucket = storage_client.bucket(bucket_name)
                 blob = bucket.blob(destination_blob_name)
 
+                metadata = {'title': file.filename, 'name': destination_blob_name }
+                blob.metadata = metadata
                 blob.upload_from_file(file)
 
                 print(
@@ -235,15 +219,26 @@ def upload():
                         file.filename, destination_blob_name
                     )
                 )
-
-                filename = file.filename,
-                status = "Uploaded"
+                params = {
+                "userid": session['id'],
+                "video": {
+                    "title" : file.filename,
+                    "url": destination_blob_name
+                    # "tag": "abcd",
+                    # "description": "asdasdas",
+                    # "privacy": "00000000000012"
+                        }
+                }
+                # res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/user_access', json=dictToSend)
+                res = requests.post('http://127.0.0.1:8080/', json=params)
+                if res.status_code == 200:
+                    status = "Uploaded"             
 
             except Exception as e:
                 print(e)
                 status="Failed to upload. An error occured."
-
-        return render_template('upload.html', message=status)
+            flash(status)
+        return render_template('upload.html')
     return render_template('upload.html')
 
 @app.route('/view/<videoName>', methods=['GET', 'POST'])
@@ -255,5 +250,5 @@ def view(videoName):
     return ("this page can only be reached with a GET request. Please click on a thumbnail on the home page")
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', '8080'))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    port = int(os.getenv('PORT', '5000'))
+    app.run(debug=False, host='0.0.0.0', port=port)
