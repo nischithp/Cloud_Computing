@@ -69,11 +69,11 @@
         <div class="video-row">
           <!-- Row  -->
           {% for videoName in videos: %}
-          <a href="/view/{{ videoName }}">
+          <a href="/view/{{ videoName['url'] }}">
             <div class="video-column">
-              <img src="https://storage.cloud.google.com/videos_thumbnail/{{ videoName.split('.')[0] }}.jpeg"
+              <img src="https://storage.cloud.google.com/videos_thumbnail/{{ videoName['url'].split('.')[0] }}.jpeg"
                 style="width:100%">
-              {{ videoName }}
+               {{ videoName['title'] }}
             </div>
           </a>
           {% endfor %}

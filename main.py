@@ -50,7 +50,7 @@ def home():
             flash("No videos found matching those keywords")
         print(videos)
         form = SearchForm(request.form)
-        return render_template(indexURL, form=form, videos=videos, ) 
+        return render_template(indexURL, form=form, videos=videos) 
     return render_template(indexURL, form=form, videos=videos)
 
 
@@ -252,8 +252,8 @@ def upload():
                         }
                 }
                 print("PArams",params)
-                res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/upload', json=dictToSend)
-                # res = requests.post('http://127.0.0.1:8080/', json=params)
+                # res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/upload', json=dictToSend)
+                res = requests.post('http://127.0.0.1:8080/', json=params)
                 if res.status_code == 200:
                     status = "Uploaded"             
                     # flash(status)
@@ -274,5 +274,5 @@ def view(videoName):
     return ("this page can only be reached with a GET request. Please click on a thumbnail on the home page")
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', '8080'))
+    port = int(os.getenv('PORT', '5000'))
     app.run(debug=False, host='0.0.0.0', port=port)

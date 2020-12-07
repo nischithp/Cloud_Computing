@@ -8,38 +8,38 @@ import json
 
 def user_access(request):
     # --------------Local testing connection string starts here---------------
-    mysql = {"database": "video_sharing",
-             "host": "35.232.179.75",
-             "port": "127.0.0.1:3306",
-             "connection": "cloudcomputinglab-291822:us-central1:cloud-computing",
-             "username": "cloud-computing",
-             "password": "cloud-computing",
-             "drivername": "mysql+pymysql",
-             "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
-             }
-    
-    eng = create_engine(mysql["url"])
+    # mysql = {"database": "video_sharing",
+    #          "host": "35.232.179.75",
+    #          "port": "127.0.0.1:3306",
+    #          "connection": "cloudcomputinglab-291822:us-central1:cloud-computing",
+    #          "username": "cloud-computing",
+    #          "password": "cloud-computing",
+    #          "drivername": "mysql+pymysql",
+    #          "url": "mysql+pymysql://cloud-computing:cloud-computing@127.0.0.1:3306/video_sharing"
+    #          }
+    #
+    # eng = create_engine(mysql["url"])
 
     # --------------Local testing connection string ends here------------------
 
     # ---------------------Cloud connection String starts here-----------
 
-    # connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
-    # query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
+    connection_name = "cloudcomputinglab-291822:us-central1:cloud-computing"
+    query_string = dict({"unix_socket": "/cloudsql/{}".format(connection_name)})
 
-    # eng = create_engine(
-    #     engine.url.URL(
-    #         drivername="mysql+pymysql",
-    #         username="cloud-computing",
-    #         password="cloud-computing",
-    #         database="video_sharing",
-    #         query=query_string,
-    #     ),
-    #     pool_size=5,
-    #     max_overflow=2,
-    #     pool_timeout=30,
-    #     pool_recycle=1800
-    # )
+    eng = create_engine(
+        engine.url.URL(
+            drivername="mysql+pymysql",
+            username="cloud-computing",
+            password="cloud-computing",
+            database="video_sharing",
+            query=query_string,
+        ),
+        pool_size=5,
+        max_overflow=2,
+        pool_timeout=30,
+        pool_recycle=1800
+    )
     #------------------ Cloud connection string ends here------------------------
 
     db = scoped_session(sessionmaker(bind=eng))
@@ -79,7 +79,6 @@ def user_access(request):
     check_user_query = sqlalchemy.text("SELECT 1 FROM users WHERE email = :email")
     get_user_query = sqlalchemy.text("SELECT id, username, firstname, lastname, email, date_time"
                                      " FROM users WHERE email = :email AND password = :password")
-    update_user_query = sqlalchemy.text("SELECT * FROM users")
 
     if request_json["request"].lower() == "login":
 
@@ -201,34 +200,3 @@ def user_access(request):
             return jsonify({"status": "unauthorized", "status_code": 401, "error": "old and new passwords do not match"}), 401
     else:
         return jsonify({"status": "Error", "status_code": 404, "error": "You can only login, register or editProfile"}), 404
-
-
-    #
-    # tables = db.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")
-    # return jsonify([{key: value for key, value in row.items()} for row in tables if row is not None]), 200
-
-    user = {"username": "Naveen",
-            "email": "naveensn100@gmail.com",
-            "firstname": "Naveen",
-            "lastname": "Navn",
-            "password": "asodasnasidndai"
-            }
-    #
-
-    # db.execute("INSERT INTO users (id, username, email, firstname, lastname, password) ",
-    #            "VALUES (, 'naveen', 'naveensn100@gmail.com', 'Naveen', 'S Na', 'asdasaxasdxasda')")
-    # db.commit()
-
-    db.execute("INSERT INTO users (username, email, firstname, lastname, password) "
-               "VALUES (:username, :email, :firstname, :lastname, :password)",
-               user)
-    db.commit()
-
-    stmt = sqlalchemy.text("SELECT * from users")
-    users = db.execute(stmt).fetchall()
-    if users is not None:
-        return jsonify([{key: value for key, value in row.items()} for row in users if row is not None]), 200
-    else:
-        return jsonify([{}])
-
-    # return jsonify({'greeting': 'Hello {}!'.format(escape(name + method))})
