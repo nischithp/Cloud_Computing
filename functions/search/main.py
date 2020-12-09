@@ -93,14 +93,20 @@ def search(request):
             search_words_title += " OR title LIKE '%" + word + "%'"
             search_words_tags += " OR tags LIKE '%" + word + "%'"
             Search_words_description += " OR description LIKE '%" + word + "%'"
-        get_videos_query = sqlalchemy.text("SELECT title, url FROM videos where (" + search_words_title +
+        get_videos_query = sqlalchemy.text("SELECT title, url, privacy FROM videos where (" + search_words_title +
                                            " OR " + search_words_tags +
                                            " OR " + Search_words_description +
                                            ") and privacy = 0")
+
+    elif "userid" in request_json and request_json["userid"]:
+        get_videos_query = sqlalchemy.text("SELECT title, url, privacy FROM videos where uploaded_by = " +
+                                           str(request_json["userid"]))
+
     else:
-        get_videos_query = sqlalchemy.text("SELECT title, url FROM videos where privacy = 0")
+        get_videos_query = sqlalchemy.text("SELECT title, url, privacy FROM videos where privacy = 0")
 
     try:
+        print(get_videos_query)
         videos_in_db = db.execute(get_videos_query).fetchall()
 
     except SQLAlchemyError as e:
@@ -109,6 +115,6 @@ def search(request):
 
     data = {"videos": []}
     for video in videos_in_db:
-        data["videos"].append({"title": video.title, "url": video.url})
+        data["videos"].append({"title": video.title, "url": video.url, "privacy": video.privacy})
     return jsonify(data)
 

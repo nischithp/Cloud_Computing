@@ -6,9 +6,6 @@ from sqlalchemy import create_engine, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 import json
-import datetime
-import os
-import urllib.request as req
 import cv2
 
 '''
@@ -133,7 +130,9 @@ def upload(request):
     else:
         data["privacy"] = 0
 
-    insert_query = sqlalchemy.text("INSERT INTO videos (title, url, uploaded_by, tags, description, privacy)"                                   ""
+    print(data)
+
+    insert_query = sqlalchemy.text("INSERT INTO videos (title, url, uploaded_by, tags, description, privacy) "                                   ""
                                    "VALUES (:title, :url, :uploaded_by, :tags, :description, :privacy)")
     try:
         db.execute(insert_query, data)
@@ -143,20 +142,20 @@ def upload(request):
         error = str(e.__dict__['orig'])
         return jsonify({"status": "fail", "status_code": 500, "error": error}), 500
 
+    print("updated to table")
+
     """Create and Uploads thumbnail to the bucket."""
     bucket_name = "videos_360"
     thumbnail_bucket_name = "videos_thumbnail"
     destination_blob_name = request_json["video"]["url"]
     print(destination_blob_name)
 
-    # storage_client = storage.Client()
     storage_client = storage.Client.from_service_account_json('cloudcomputinglab-291822-d8e65d7158be.json')
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.get_blob(destination_blob_name)
     blob.download_to_filename("/tmp/" + destination_blob_name)
 
     cap = cv2.VideoCapture("/tmp/" + destination_blob_name)
-    # print(url)
     if cap.isOpened():
         ret, frame = cap.read()
         image_name = destination_blob_name.split('.')[0] + '.jpeg'

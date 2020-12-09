@@ -1,11 +1,11 @@
 import requests
 
-params = {"data": {"email": "a123aaa@gmial.com",
-                   "password": "71237**123712383",
-                   "username": "123",
-                   "firstname": "123",
-                   "lastname": "123"},
-          "request": "register"}
+# params = {"data": {"email": "a123aaa@gmial.com",
+#                    "password": "71237**123712383",
+#                    "username": "123",
+#                    "firstname": "123",
+#                    "lastname": "123"},
+#           "request": "register"}
 
 # dictToSend = {"data": {"email": "a123aaa@gmial.com",
 #                        "password": "71237**123712383",
@@ -14,19 +14,19 @@ params = {"data": {"email": "a123aaa@gmial.com",
 #                        "lastname": "123"},
 #               "request": "login"}
 
-params = {
-    "userid": 7,
-    "video": {
-        "title": 'cat',
-        "url": "45-20201207191540.mp4",
-        "tag": "abcd",
-        "description": "asdasdas",
-        "privecy": "00000000000012"
-    }
-}
-# params = {"search": "cat"}
+# params = {
+#     "userid": 7,
+#     "video": {
+#         "title": 'Music',
+#         "url": "45-20201208010359.mp4",
+#         "tag": "abcd",
+#         "description": "asdasdas",
+#         "privecy": "00000000000012"
+#     }
+# }
+params = {"userid": 45}
 
-res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/upload', json=params)
+res = requests.post('https://us-central1-cloudcomputinglab-291822.cloudfunctions.net/search', json=params)
 # res = requests.post('http://127.0.0.1:8080/', json=params)
 
 print(res.text, res.status_code)
